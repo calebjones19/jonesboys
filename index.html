@@ -1702,7 +1702,7 @@ function render(){
   </div></div>`;
 
   if(!done&&q.type==="number"){const el=document.getElementById("ai");if(el){el.focus();el.value=S.input}}
-  if(!done&&q.type==="pic-choice"){document.querySelectorAll('.pic-choice-btn').forEach(b=>b.addEventListener('click',function(){check(this.dataset.answer)}))}
+  if(!done&&q.type==="pic-choice"){const pc=document.querySelector('.pic-choices');if(pc)pc.addEventListener('click',function(e){const btn=e.target.closest('.pic-choice-btn');if(btn)check(btn.dataset.answer)})}
 }
 
 // ============ ACTIONS ============
@@ -1723,11 +1723,11 @@ function check(v){
   const maxHints=getMaxHints();
   const maxAttempts=getMaxAttempts();
   let uv;
-  if(q.type==="yesno"||q.type==="choice"){uv=v}else{const el=document.getElementById("ai");uv=el?el.value.trim():S.input.trim();S.input=uv}
+  if(q.type==="yesno"||q.type==="choice"||q.type==="pic-choice"){uv=v}else{const el=document.getElementById("ai");uv=el?el.value.trim():S.input.trim();S.input=uv}
   if(!uv&&uv!==0)return;
   let ok=false;
   if(q.type==="yesno"){ok=uv.toLowerCase()===q.correctAnswer}
-  else if(q.type==="choice"){ok=uv===String(q.answer)}
+  else if(q.type==="choice"||q.type==="pic-choice"){ok=uv===String(q.answer)}
   else{ok=Math.abs(Number(uv)-q.answer)<0.01}
   if(ok){
     S.score++;confetti(getConfettiColors());
