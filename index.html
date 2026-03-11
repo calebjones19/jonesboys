@@ -104,6 +104,11 @@
   .choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
   .choice-btn{padding:12px;font-size:15px;font-weight:600;border-radius:10px;cursor:pointer;border:2px solid #e2e8f0;background:#f8fafc;color:#1e293b;transition:all .15s;font-family:'Inter',sans-serif;text-align:center}
   .choice-btn:hover{border-color:#0076B6;background:#f0f9ff}
+  .pic-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .pic-choice-btn{padding:12px;border-radius:14px;cursor:pointer;border:3px solid #e2e8f0;background:#f8fafc;transition:all .15s;text-align:center;display:flex;align-items:center;justify-content:center}
+  .pic-choice-btn:hover{border-color:#0076B6;background:#f0f9ff;transform:scale(1.03)}
+  .pic-choice-btn svg{max-width:100%;height:auto}
+  .sight-word-display{font-family:'Fredoka',sans-serif;font-size:72px;font-weight:700;text-align:center;color:#1A1A2E;letter-spacing:3px;padding:16px}
 
   /* ===== MAVERICK STYLES ===== */
   .mav .hero{background:linear-gradient(135deg,#1A1A2E,#E23636);border-bottom:4px solid #FFD700}
@@ -1325,12 +1330,12 @@ function genSightWords(){
   const picWords=Object.keys(WORD_IMAGES);
   const word=pick(picWords);
   const wrongs=shuffle(picWords.filter(w=>w!==word)).slice(0,3);
-  return{teach:`${hero} says: Look at the picture! Which word matches?`,
-    question:`Which word is this?`,
-    visual:WORD_IMAGES[word],
-    answer:word,type:"choice",choices:shuffle([word,...wrongs]),level:"Warm-Up",
-    hint1:`The word starts with the letter "${word[0].toUpperCase()}"`,
-    explanation:`The answer is "${word}"! ${emoji} Awesome reading! ⭐`};
+  return{teach:`${hero} says: Read the word, then find the matching picture!`,
+    question:`Find the picture that matches this word:`,
+    visual:`<div class="sight-word-display">${word}</div>`,
+    answer:word,type:"pic-choice",choices:shuffle([word,...wrongs]),level:"Warm-Up",
+    hint1:`Think about what a ${word} looks like!`,
+    explanation:`Yes! That's a ${word}! ${emoji} Great reading! ⭐`};
 }
 
 // ======== KINDERGARTEN MATH ========
@@ -1648,6 +1653,8 @@ function render(){
   if(!done){
     if(q.type==="yesno"){
       inp=`<div class="yesno-row"><button class="btn-yes" onclick="check('yes')">Yes ✅</button><button class="btn-no" onclick="check('no')">No ❌</button></div>`;
+    }else if(q.type==="pic-choice"&&q.choices){
+      inp=`<div class="pic-choices">${q.choices.map(c=>`<button class="pic-choice-btn" onclick="check('${c.replace(/'/g,"\\'")}')">${WORD_IMAGES[c]||c}</button>`).join("")}</div>`;
     }else if(q.type==="choice"&&q.choices){
       inp=`<div class="choices">${q.choices.map(c=>`<button class="choice-btn" onclick="check('${c.replace(/'/g,"\\'")}')">${c}</button>`).join("")}</div>`;
     }else{
