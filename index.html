@@ -1654,7 +1654,7 @@ function render(){
     if(q.type==="yesno"){
       inp=`<div class="yesno-row"><button class="btn-yes" onclick="check('yes')">Yes ✅</button><button class="btn-no" onclick="check('no')">No ❌</button></div>`;
     }else if(q.type==="pic-choice"&&q.choices){
-      inp=`<div class="pic-choices">${q.choices.map(c=>`<button class="pic-choice-btn" data-answer="${c}">${WORD_IMAGES[c]||c}</button>`).join("")}</div><script>document.querySelectorAll('.pic-choice-btn').forEach(b=>b.addEventListener('click',function(){check(this.dataset.answer)}))<\/script>`;
+      inp=`<div class="pic-choices">${q.choices.map(c=>`<button class="pic-choice-btn" data-answer="${c}">${WORD_IMAGES[c]||c}</button>`).join("")}</div>`;
     }else if(q.type==="choice"&&q.choices){
       inp=`<div class="choices">${q.choices.map(c=>`<button class="choice-btn" onclick="check('${c.replace(/'/g,"\\'")}')">${c}</button>`).join("")}</div>`;
     }else{
@@ -1702,6 +1702,7 @@ function render(){
   </div></div>`;
 
   if(!done&&q.type==="number"){const el=document.getElementById("ai");if(el){el.focus();el.value=S.input}}
+  if(!done&&q.type==="pic-choice"){document.querySelectorAll('.pic-choice-btn').forEach(b=>b.addEventListener('click',function(){check(this.dataset.answer)}))}
 }
 
 // ============ ACTIONS ============
