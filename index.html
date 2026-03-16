@@ -1840,6 +1840,13 @@ function generateQuiz(topicId){
     selected.forEach((q,i)=>q._num=i+1);
     return selected.slice(0,numQ);
   } else {
+    // If topic has a fixed numQ (like counting with exactly 3), generate exactly that many in order
+    if(topic.numQ){
+      const qs=[];
+      for(let i=0;i<topic.numQ;i++){qs.push(topic.gen())}
+      qs.forEach((q,i)=>q._num=i+1);
+      return qs;
+    }
     // Mav: simpler — just generate and shuffle
     const qs=[];
     let safety=0;
