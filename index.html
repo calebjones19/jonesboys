@@ -1459,14 +1459,399 @@ function genKMath(){
   return pick(G)();
 }
 
+// ======== LETTER SOUNDS (Phonics) ========
+function genLetterSounds(){
+  const ALPHA="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const SOUND_MAP={A:"ah",B:"buh",C:"kuh",D:"duh",E:"eh",F:"fff",G:"guh",H:"huh",I:"ih",J:"juh",K:"kuh",L:"lll",M:"mmm",N:"nnn",O:"ah",P:"puh",Q:"kwuh",R:"rrr",S:"sss",T:"tuh",U:"uh",V:"vvv",W:"wuh",X:"ks",Y:"yuh",Z:"zzz"};
+  const WORD_MAP={A:"apple",B:"ball",C:"cat",D:"dog",E:"egg",F:"fish",G:"goat",H:"hat",I:"igloo",J:"jump",K:"kite",L:"lion",M:"moon",N:"nest",O:"octopus",P:"pig",Q:"queen",R:"robot",S:"sun",T:"truck",U:"umbrella",V:"van",W:"web",X:"x-ray",Y:"yak",Z:"zebra"};
+  const EMOJI_MAP={A:"🍎",B:"⚾",C:"🐱",D:"🐶",E:"🥚",F:"🐟",G:"🐐",H:"🎩",I:"🏔️",J:"🦘",K:"🪁",L:"🦁",M:"🌙",N:"🪺",O:"🐙",P:"🐷",Q:"👸",R:"🤖",S:"☀️",T:"🚚",U:"☂️",V:"🚐",W:"🕸️",X:"🩻",Y:"🦬",Z:"🦓"};
+  const hero=pick(HEROES);const emoji=HERO_EMOJI[hero];
+  const G=[
+    // 1. What sound does this letter make?
+    function(){
+      const idx=rand(0,25);const letter=ALPHA[idx];
+      const sound=SOUND_MAP[letter];const word=WORD_MAP[letter];
+      return{teach:`${hero} says: Every letter makes a sound! "${letter}" says "${sound}" like in "${word}" ${EMOJI_MAP[letter]}`,
+        question:`What sound does the letter ${letter} make?`,
+        visual:`<span class="letter-big">${letter}</span>`,
+        answer:sound,type:"choice",choices:shuffle([sound,...shuffle(Object.values(SOUND_MAP).filter(s=>s!==sound)).slice(0,3)]),level:"Warm-Up",
+        hint1:`Say "${word}" slowly. What sound does it start with?`,
+        explanation:`${letter} says "${sound}"! Like in "${word}" ${EMOJI_MAP[letter]}! ${emoji} ⭐`};
+    },
+    // 2. Which letter makes this sound?
+    function(){
+      const idx=rand(0,25);const letter=ALPHA[idx];
+      const sound=SOUND_MAP[letter];const word=WORD_MAP[letter];
+      const wrongs=shuffle(ALPHA.split("").filter(l=>l!==letter&&SOUND_MAP[l]!==sound)).slice(0,3);
+      return{teach:`${hero} says: If you hear a sound, you can find the letter! Listen carefully!`,
+        question:`Which letter makes the "${sound}" sound?`,
+        answer:letter,type:"choice",choices:shuffle([letter,...wrongs]),level:"Building Up",
+        hint1:`Think about the word "${word}". What letter does it start with?`,
+        explanation:`The letter ${letter} makes the "${sound}" sound! ${EMOJI_MAP[letter]} ${emoji} ⭐`};
+    },
+    // 3. What word starts with this sound?
+    function(){
+      const idx=rand(0,25);const letter=ALPHA[idx];
+      const word=WORD_MAP[letter];const sound=SOUND_MAP[letter];
+      const wrongIdxs=shuffle([...Array(26).keys()].filter(i=>i!==idx)).slice(0,3);
+      const wrongs=wrongIdxs.map(i=>WORD_MAP[ALPHA[i]]);
+      return{teach:`${hero} says: The first sound in a word tells you what letter it starts with!`,
+        question:`Which word starts with the "${sound}" sound?`,
+        visual:`<span class="letter-big">"${sound}"</span>`,
+        answer:word,type:"choice",choices:shuffle([word,...wrongs]),level:"Warm-Up",
+        hint1:`Say each word out loud. Which one starts with "${sound}"?`,
+        explanation:`"${word}" starts with "${sound}"! That's the letter ${letter}! ${EMOJI_MAP[letter]} ⭐`};
+    },
+    // 4. Match the picture to its beginning sound
+    function(){
+      const idx=rand(0,25);const letter=ALPHA[idx];
+      const word=WORD_MAP[letter];const emojiPic=EMOJI_MAP[letter];
+      const wrongs=shuffle(ALPHA.split("").filter(l=>l!==letter)).slice(0,3);
+      return{teach:`${hero} says: Look at the picture and say the word. The FIRST sound tells you the letter!`,
+        question:`${emojiPic} What letter does "${word}" start with?`,
+        visual:`<div style="font-size:80px;text-align:center">${emojiPic}</div>`,
+        answer:letter,type:"choice",choices:shuffle([letter,...wrongs]),level:"Warm-Up",
+        hint1:`Say "${word}" slowly. What's the very first sound?`,
+        explanation:`"${word}" starts with ${letter}! ${emojiPic} = ${letter}! ${emoji} ⭐`};
+    },
+    // 5. Do these words start with the same sound?
+    function(){
+      const idx=rand(0,25);const letter=ALPHA[idx];
+      const word1=WORD_MAP[letter];
+      const sameSound=Math.random()<0.5;
+      let word2;
+      if(sameSound){
+        const sameLetterWords={A:["ant","alligator"],B:["bear","bus"],C:["cow","cup"],D:["duck","drum"],E:["elephant","elf"],F:["frog","fan"],G:["grape","girl"],H:["horse","hill"],I:["inch","itch"],J:["jar","jog"],K:["king","kid"],L:["lamp","log"],M:["mouse","map"],N:["nut","nap"],O:["otter","ox"],P:["pen","pan"],Q:["quiz","quilt"],R:["rain","rug"],S:["sock","sit"],T:["top","tap"],U:["up","us"],V:["vest","vet"],W:["win","wig"],X:["mix","box"],Y:["yes","yam"],Z:["zip","zoo"]};
+        word2=pick(sameLetterWords[letter]);
+      }else{
+        const idx2=rand(0,25);const l2=ALPHA[idx2===idx?(idx+1)%26:idx2];
+        word2=WORD_MAP[l2];
+      }
+      return{teach:`${hero} says: Words that start with the same letter share the same beginning sound!`,
+        question:`Do "${word1}" and "${word2}" start with the SAME sound?`,
+        visual:`<div style="font-size:40px;text-align:center;font-family:Fredoka,sans-serif">${word1} &nbsp; ${word2}</div>`,
+        type:"yesno",correctAnswer:sameSound?"yes":"no",level:"Building Up",
+        hint1:`Say both words slowly. Does your mouth make the same sound at the start?`,
+        explanation:sameSound?`Yes! Both start with the "${SOUND_MAP[letter]}" sound (letter ${letter})! ${emoji} ⭐`:`No! "${word1}" starts with ${letter} ("${SOUND_MAP[letter]}") but "${word2}" starts with a different sound! ${emoji} ⭐`};
+    },
+    // 6. What is the ending sound?
+    function(){
+      const endSounds=[{words:["cat","hat","bat"],sound:"t",display:"tuh"},{words:["dog","frog","log"],sound:"g",display:"guh"},{words:["sun","moon","van"],sound:"n",display:"nnn"},{words:["bus","dress","kiss"],sound:"s",display:"sss"},{words:["ball","bell","doll"],sound:"l",display:"lll"},{words:["book","truck","duck"],sound:"k",display:"kuh"},{words:["bed","hand","red"],sound:"d",display:"duh"},{words:["cup","map","top"],sound:"p",display:"puh"}];
+      const group=pick(endSounds);const word=pick(group.words);
+      const wrongs=shuffle(endSounds.filter(g=>g.sound!==group.sound)).slice(0,3).map(g=>g.display);
+      return{teach:`${hero} says: Words have sounds at the END too! Say the word slowly and listen to the last sound.`,
+        question:`What sound do you hear at the END of "${word}"?`,
+        visual:`<div style="font-size:48px;text-align:center;font-family:Fredoka,sans-serif">${word}</div>`,
+        answer:group.display,type:"choice",choices:shuffle([group.display,...wrongs]),level:"Challenge",
+        hint1:`Say "${word}" very slowly. What does your mouth do at the very end?`,
+        explanation:`"${word}" ends with the "${group.display}" sound! Great listening! ${emoji} ⭐`};
+    },
+    // 7. Rhyming words (phonological awareness)
+    function(){
+      const rhymes=[{words:["cat","hat","bat","mat"],family:"-at"},{words:["dog","log","frog","hog"],family:"-og"},{words:["sun","fun","run","bun"],family:"-un"},{words:["bed","red","fed","led"],family:"-ed"},{words:["top","hop","pop","mop"],family:"-op"},{words:["big","pig","dig","wig"],family:"-ig"},{words:["cup","up","pup"],family:"-up"},{words:["can","man","fan","van"],family:"-an"}];
+      const group=pick(rhymes);const target=group.words[0];
+      const answer=pick(group.words.filter(w=>w!==target));
+      const wrongs=shuffle(rhymes.filter(g=>g.family!==group.family).map(g=>pick(g.words))).slice(0,3);
+      return{teach:`${hero} says: Rhyming words sound the same at the end! "Cat" and "hat" rhyme because they both end in "-at"!`,
+        question:`Which word rhymes with "${target}"?`,
+        visual:`<div style="font-size:48px;text-align:center;font-family:Fredoka,sans-serif">${target}</div>`,
+        answer:answer,type:"choice",choices:shuffle([answer,...wrongs]),level:"Building Up",
+        hint1:`"${target}" ends with "${group.family}". Which other word ends the same way?`,
+        explanation:`"${target}" and "${answer}" rhyme! They both end with "${group.family}"! ${emoji} ⭐`};
+    },
+    // 8. How many sounds in this word?
+    function(){
+      const countWords=[{word:"cat",count:3,sounds:"c-a-t"},{word:"dog",count:3,sounds:"d-o-g"},{word:"sun",count:3,sounds:"s-u-n"},{word:"hat",count:3,sounds:"h-a-t"},{word:"fish",count:3,sounds:"f-i-sh"},{word:"go",count:2,sounds:"g-o"},{word:"me",count:2,sounds:"m-e"},{word:"up",count:2,sounds:"u-p"},{word:"it",count:2,sounds:"i-t"},{word:"bed",count:3,sounds:"b-e-d"},{word:"pig",count:3,sounds:"p-i-g"},{word:"top",count:3,sounds:"t-o-p"}];
+      const item=pick(countWords);
+      const wrongs=shuffle([1,2,3,4].filter(n=>n!==item.count)).slice(0,3);
+      return{teach:`${hero} says: Break the word into sounds! "Cat" has 3 sounds: /c/ /a/ /t/. Tap your fingers as you say each sound!`,
+        question:`How many sounds do you hear in "${item.word}"?`,
+        visual:`<div style="font-size:48px;text-align:center;font-family:Fredoka,sans-serif">${item.word}</div>`,
+        answer:String(item.count),type:"choice",choices:shuffle([String(item.count),...wrongs.map(String)]),level:"Challenge",
+        hint1:`Say "${item.word}" slowly: /${item.sounds.split("-").join("/ /")}/ — count each sound!`,
+        explanation:`"${item.word}" has ${item.count} sounds: /${item.sounds.split("-").join("/ /")}/ ${emoji} ⭐`};
+    }
+  ];
+  return pick(G)();
+}
+
+// ======== COUNTING TO 100 ========
+function genCounting(){
+  const hero=pick(HEROES);const emoji=HERO_EMOJI[hero];
+  const G=[
+    // 1. What number comes next? (ones, 1-20)
+    function(){
+      const n=rand(1,19);const answer=n+1;
+      const wrongs=shuffle([n-1,n+2,n+3].filter(x=>x>=0&&x!==answer)).slice(0,3);
+      return{teach:`${hero} says: Numbers go in order! Count up one at a time: 1, 2, 3...`,
+        question:`What number comes after ${n}?`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Warm-Up",
+        hint1:`Count: ${n}... what's the next one?`,
+        explanation:`${n}, ${answer}! ${emoji} ⭐`};
+    },
+    // 2. What number comes next? (ones, 20-99)
+    function(){
+      const n=rand(20,98);const answer=n+1;
+      const wrongs=shuffle([n-1,n+2,n+10].filter(x=>x!==answer&&x>0&&x<=100)).slice(0,3);
+      return{teach:`${hero} says: Even big numbers go in order! After 29 comes 30, after 49 comes 50!`,
+        question:`What number comes after ${n}?`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Building Up",
+        hint1:`Count: ${n}... what's next? Think about the pattern!`,
+        explanation:`${n}, ${answer}! Big number hero! ${emoji} ⭐`};
+    },
+    // 3. Count by tens
+    function(){
+      const start=rand(1,8)*10;const answer=start+10;
+      const wrongs=shuffle([start-10,start+20,start+5].filter(x=>x>0&&x<=100&&x!==answer)).slice(0,3);
+      return{teach:`${hero} says: Counting by 10s is like taking big jumps! 10, 20, 30, 40...`,
+        question:`Count by 10s: ${start-10}, ${start}, ___`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Warm-Up",
+        hint1:`You're counting by 10s. What comes 10 after ${start}?`,
+        explanation:`${start-10}, ${start}, ${answer}! Counting by 10s! ${emoji} ⭐`};
+    },
+    // 4. Fill in the missing number (small range)
+    function(){
+      const start=rand(1,17);
+      const missing=start+1;
+      return{teach:`${hero} says: If you know the numbers around it, you can figure out the missing one!`,
+        question:`Fill in the blank: ${start}, ___, ${start+2}`,
+        answer:String(missing),type:"choice",choices:shuffle([String(missing),String(missing+1),String(missing-1),String(missing+2)]),level:"Warm-Up",
+        hint1:`What number is between ${start} and ${start+2}?`,
+        explanation:`${start}, ${missing}, ${start+2}! You found it! ${emoji} ⭐`};
+    },
+    // 5. Fill in the missing number (bigger range)
+    function(){
+      const start=rand(20,96);
+      const missing=start+1;
+      return{teach:`${hero} says: Even with bigger numbers, the pattern is the same — count one more!`,
+        question:`Fill in the blank: ${start}, ___, ${start+2}`,
+        answer:String(missing),type:"choice",choices:shuffle([String(missing),String(missing+1),String(missing-1),String(start+10)].filter((v,i,a)=>a.indexOf(v)===i)).slice(0,4),level:"Building Up",
+        hint1:`What number comes right after ${start}?`,
+        explanation:`${start}, ${missing}, ${start+2}! ${emoji} ⭐`};
+    },
+    // 6. Count backwards
+    function(){
+      const n=rand(5,20);const answer=n-1;
+      const wrongs=shuffle([n+1,n-2,n-3].filter(x=>x>=0&&x!==answer)).slice(0,3);
+      return{teach:`${hero} says: Counting backwards is like a rocket launch! 5, 4, 3, 2, 1... BLAST OFF!`,
+        question:`Count backwards: ${n+1}, ${n}, ___`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Building Up",
+        hint1:`You're going down: ${n+1}, ${n}... what comes next going down?`,
+        explanation:`${n+1}, ${n}, ${answer}! Great backwards counting! ${emoji} ⭐`};
+    },
+    // 7. Which number is bigger?
+    function(){
+      let a=rand(1,50),b=rand(1,50);while(a===b)b=rand(1,50);
+      const answer=String(Math.max(a,b));
+      return{teach:`${hero} says: The bigger number is the one you say LATER when counting! 50 is bigger than 20!`,
+        question:`Which number is BIGGER: ${a} or ${b}?`,
+        answer:answer,type:"choice",choices:[String(a),String(b)],level:"Warm-Up",
+        hint1:`When you count, which number do you say later — ${a} or ${b}?`,
+        explanation:`${answer} is bigger! ${emoji} ⭐`};
+    },
+    // 8. Count by 10s starting from a number
+    function(){
+      const start=rand(1,9);
+      const seq=[start,start+10,start+20];const answer=start+30;
+      const wrongs=shuffle([start+40,start+20,answer+10].filter(x=>x!==answer&&x<=100)).slice(0,3);
+      return{teach:`${hero} says: You can count by 10s starting from ANY number! ${start}, ${start+10}, ${start+20}...`,
+        question:`Count by 10s: ${seq.join(", ")}, ___`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Challenge",
+        hint1:`Add 10 more to ${start+20}!`,
+        explanation:`${seq.join(", ")}, ${answer}! Skip counting master! ${emoji} ⭐`};
+    },
+    // 9. How many tens and ones?
+    function(){
+      const tens=rand(1,9);const ones=rand(0,9);const num=tens*10+ones;
+      const answers=[`${tens} tens and ${ones} ones`];
+      const wrongs=shuffle([`${ones} tens and ${tens} ones`,`${tens+1} tens and ${ones} ones`,`${tens} tens and ${ones+1} ones`].filter(w=>!answers.includes(w))).slice(0,3);
+      return{teach:`${hero} says: Numbers are made of TENS and ONES! 34 = 3 tens and 4 ones!`,
+        question:`How many tens and ones in ${num}?`,
+        visual:`<div style="font-size:56px;text-align:center;font-family:Fredoka,sans-serif">${num}</div>`,
+        answer:answers[0],type:"choice",choices:shuffle([answers[0],...wrongs]),level:"Challenge",
+        hint1:`The first digit (${tens}) tells you the tens. The second digit (${ones}) tells you the ones!`,
+        explanation:`${num} = ${tens} tens and ${ones} ones! ${emoji} ⭐`};
+    },
+    // 10. What comes after 100s boundary?
+    function(){
+      const boundary=pick([9,19,29,39,49,59,69,79,89]);const answer=boundary+1;
+      const wrongs=shuffle([boundary-1,boundary+2,boundary+11].filter(x=>x!==answer&&x>0&&x<=100)).slice(0,3);
+      return{teach:`${hero} says: The tricky part is crossing to a new group of 10! After 29 comes 30, after 39 comes 40!`,
+        question:`What number comes after ${boundary}?`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Challenge",
+        hint1:`${boundary} is the LAST number in the ${Math.floor(boundary/10)*10}s. What group comes next?`,
+        explanation:`After ${boundary} comes ${answer}! You crossed into the ${answer}s! ${emoji} ⭐`};
+    }
+  ];
+  return pick(G)();
+}
+
+// ======== READING COMPREHENSION ========
+function genComprehension(){
+  const hero=pick(HEROES);const emoji=HERO_EMOJI[hero];
+  const STORIES=[
+    {text:"The cat sat on the mat. The cat is big.",q:"Where did the cat sit?",a:"on the mat",choices:["on the mat","on the bed","in the car","on the bus"]},
+    {text:"The dog ran to the park. The dog played with a ball.",q:"Where did the dog go?",a:"the park",choices:["the park","the store","the school","the house"]},
+    {text:"The sun is hot. The sun is in the sky.",q:"Where is the sun?",a:"in the sky",choices:["in the sky","on the ground","in the water","in the house"]},
+    {text:"The fish lives in the water. The fish is blue.",q:"What color is the fish?",a:"blue",choices:["blue","red","green","yellow"]},
+    {text:"The boy has a red hat. He wears it every day.",q:"What color is the hat?",a:"red",choices:["red","blue","green","black"]},
+    {text:"Mom made a cake. The cake has pink frosting.",q:"What is on the cake?",a:"pink frosting",choices:["pink frosting","chocolate","sprinkles","nothing"]},
+    {text:"The frog can jump. The frog sits on a log.",q:"What can the frog do?",a:"jump",choices:["jump","fly","swim","run"]},
+    {text:"It is raining outside. We need an umbrella.",q:"What do we need?",a:"an umbrella",choices:["an umbrella","a hat","sunglasses","a book"]},
+    {text:"The bird is in the tree. The bird sings a song.",q:"Where is the bird?",a:"in the tree",choices:["in the tree","on the roof","in a cage","on the ground"]},
+    {text:"I have two hands. I can clap with my hands.",q:"How many hands do you have?",a:"two",choices:["two","one","three","four"]},
+    {text:"The pig is in the mud. The pig is happy.",q:"How does the pig feel?",a:"happy",choices:["happy","sad","angry","scared"]},
+    {text:"The bus is yellow. Kids ride the bus to school.",q:"What color is the bus?",a:"yellow",choices:["yellow","red","blue","green"]},
+    {text:"The moon comes out at night. Stars are in the sky too.",q:"When does the moon come out?",a:"at night",choices:["at night","in the morning","at lunch","in the afternoon"]},
+    {text:"Dad has a big red car. He drives it to work.",q:"Where does Dad drive?",a:"to work",choices:["to work","to school","to the park","to the store"]},
+    {text:"The cup has milk in it. Milk is white.",q:"What is in the cup?",a:"milk",choices:["milk","juice","water","soda"]},
+    {text:"We read a book at bedtime. The book was about a bear.",q:"What was the book about?",a:"a bear",choices:["a bear","a cat","a dog","a fish"]},
+    {text:"The egg is in the nest. A baby bird will come out.",q:"Where is the egg?",a:"in the nest",choices:["in the nest","on the table","in a pan","on the floor"]},
+    {text:"My bed is soft. I sleep in my bed at night.",q:"When do you sleep in your bed?",a:"at night",choices:["at night","in the morning","at lunch","all day"]},
+    {text:"The tree is tall. It has green leaves.",q:"What color are the leaves?",a:"green",choices:["green","red","yellow","brown"]},
+    {text:"The star is bright. You can see stars at night.",q:"When can you see stars?",a:"at night",choices:["at night","in the morning","at noon","all the time"]}
+  ];
+  const story=pick(STORIES);
+  return{teach:`${hero} says: Read the sentences carefully. Then answer the question about what you read!`,
+    question:story.q,
+    visual:`<div style="font-size:24px;text-align:center;font-family:Fredoka,sans-serif;line-height:1.8;padding:10px;background:#fffbeb;border-radius:12px;border:2px dashed #f59e0b">${story.text}</div>`,
+    answer:story.a,type:"choice",choices:shuffle(story.choices),level:"Building Up",
+    hint1:`Read the sentences again slowly. The answer is hiding in the words!`,
+    explanation:`"${story.a}" is right! Great reading! ${emoji} ⭐`};
+}
+
+// ======== ADDITION & SUBTRACTION (within 10) ========
+function genAddSub(){
+  const hero=pick(HEROES);const emoji=HERO_EMOJI[hero];
+  const thing=pick(MAV_THINGS);
+  const emojiMap={"monster trucks":"🚛","Legos":"🧱","guitars":"🎸","baseballs":"⚾","llamas":"🦙","action figures":"🦸","stickers":"⭐","crayons":"🖍️","toy cars":"🚗","cookies":"🍪"};
+  const te=emojiMap[thing]||"⭐";
+  const G=[
+    // 1. Simple addition with pictures
+    function(){
+      const a=rand(1,5),b=rand(1,5-a+1>0?5-a+1:1);const sum=a+b;
+      return{teach:`${hero} says: Adding means counting everything together! Put the groups together and count them all!`,
+        question:`${a} + ${b} = ?`,
+        visual:`<div class="emoji-count">${Array(a).fill(te).join(" ")}  ➕  ${Array(b).fill(te).join(" ")}</div>`,
+        answer:String(sum),type:"choice",choices:shuffle([String(sum),String(sum+1),String(sum-1),String(a)].filter((v,i,a)=>a.indexOf(v)===i&&v!=="0")).slice(0,4),level:"Warm-Up",
+        hint1:`Count them all together: ${Array(a+b).fill(te).join(" ")}`,
+        explanation:`${a} + ${b} = ${sum}! ${te} ${emoji} ⭐`};
+    },
+    // 2. Simple subtraction with pictures
+    function(){
+      const a=rand(3,10),b=rand(1,a-1);const diff=a-b;
+      return{teach:`${hero} says: Subtracting means taking some away! Cross some out and count what's left!`,
+        question:`${a} - ${b} = ?`,
+        visual:`<div class="emoji-count">${Array(diff).fill(te).join(" ")} ${Array(b).fill("❌").join(" ")}</div>`,
+        answer:String(diff),type:"choice",choices:shuffle([String(diff),String(diff+1),String(diff-1>0?diff-1:diff+2),String(a)].filter((v,i,a)=>a.indexOf(v)===i)).slice(0,4),level:"Warm-Up",
+        hint1:`Start with ${a}, take away ${b}. How many are left?`,
+        explanation:`${a} - ${b} = ${diff}! ${te} ${emoji} ⭐`};
+    },
+    // 3. Make 5 (number bonds)
+    function(){
+      const a=rand(0,5);const answer=5-a;
+      const wrongs=shuffle([0,1,2,3,4,5].filter(n=>n!==answer)).slice(0,3);
+      return{teach:`${hero} says: Number bonds to 5! Two numbers that add up to 5 are best friends!`,
+        question:`${a} + ___ = 5`,
+        visual:`<div class="emoji-count">${Array(a).fill(te).join(" ")} ➕ ❓❓❓</div>`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]),level:"Building Up",
+        hint1:`You have ${a}. How many more do you need to get to 5?`,
+        explanation:`${a} + ${answer} = 5! They're a number bond! ${emoji} ⭐`};
+    },
+    // 4. Make 10 (number bonds)
+    function(){
+      const a=rand(0,10);const answer=10-a;
+      const wrongs=shuffle([...Array(11).keys()].filter(n=>n!==answer)).slice(0,3);
+      return{teach:`${hero} says: Making 10 is a SUPER power! Two numbers that add up to 10 make a team!`,
+        question:`${a} + ___ = 10`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]),level:"Building Up",
+        hint1:`Start at ${a} and count up to 10. How many fingers did you count?`,
+        explanation:`${a} + ${answer} = 10! Ten team! ${emoji} ⭐`};
+    },
+    // 5. Addition word problem
+    function(){
+      const a=rand(1,5),b=rand(1,5);const sum=a+b;
+      const hero2=pick(HEROES.filter(h=>h!==hero));
+      return{teach:`${hero} says: When you hear "in all" or "altogether," that means ADD!`,
+        question:`${hero} has ${a} ${thing}. ${hero2} has ${b} ${thing}. How many in all?`,
+        visual:`<div class="emoji-count">${Array(a).fill(te).join(" ")} &nbsp;+&nbsp; ${Array(b).fill(te).join(" ")}</div>`,
+        answer:String(sum),type:"choice",choices:shuffle([String(sum),String(sum+1),String(Math.abs(a-b)),String(a)].filter((v,i,a)=>a.indexOf(v)===i)).slice(0,4),level:"Building Up",
+        hint1:`Put all the ${thing} together: ${a} + ${b} = ?`,
+        explanation:`${a} + ${b} = ${sum} ${thing} in all! ${te} ${emoji} ⭐`};
+    },
+    // 6. Subtraction word problem
+    function(){
+      const a=rand(4,10),b=rand(1,a-1);const diff=a-b;
+      return{teach:`${hero} says: When something goes away, is lost, or eaten — that means SUBTRACT!`,
+        question:`${hero} had ${a} ${thing}. He gave away ${b}. How many are left?`,
+        answer:String(diff),type:"choice",choices:shuffle([String(diff),String(diff+1),String(diff-1>0?diff-1:diff+2),String(a)].filter((v,i,a)=>a.indexOf(v)===i)).slice(0,4),level:"Building Up",
+        hint1:`Start with ${a} and take away ${b}: ${a} - ${b} = ?`,
+        explanation:`${a} - ${b} = ${diff} ${thing} left! ${te} ${emoji} ⭐`};
+    },
+    // 7. What's the missing number? (addition)
+    function(){
+      const a=rand(1,5),b=rand(1,5);const sum=a+b;
+      const wrongs=shuffle([a-1,a+1,a+2].filter(x=>x>0&&x!==a)).slice(0,3);
+      return{teach:`${hero} says: If you know the total and one part, you can find the missing part!`,
+        question:`___ + ${b} = ${sum}`,
+        answer:String(a),type:"choice",choices:shuffle([String(a),...wrongs.map(String)]).slice(0,4),level:"Challenge",
+        hint1:`What number plus ${b} equals ${sum}? Try counting up from ${b}!`,
+        explanation:`${a} + ${b} = ${sum}! The missing number is ${a}! ${emoji} ⭐`};
+    },
+    // 8. Fact families
+    function(){
+      const a=rand(1,5),b=rand(1,5);const sum=a+b;
+      const ops=[[`${a} + ${b}`,sum],[`${b} + ${a}`,sum],[`${sum} - ${a}`,b],[`${sum} - ${b}`,a]];
+      const op=pick(ops);
+      const wrongs=shuffle([op[1]-1,op[1]+1,op[1]+2].filter(x=>x>=0&&x!==op[1])).slice(0,3);
+      return{teach:`${hero} says: Fact families are numbers that work together! If ${a} + ${b} = ${sum}, then ${sum} - ${b} = ${a}!`,
+        question:`${op[0]} = ?`,
+        answer:String(op[1]),type:"choice",choices:shuffle([String(op[1]),...wrongs.map(String)]).slice(0,4),level:"Challenge",
+        hint1:`Think about the fact family: ${a}, ${b}, and ${sum} all work together!`,
+        explanation:`${op[0]} = ${op[1]}! Fact families are powerful! ${emoji} ⭐`};
+    },
+    // 9. Doubles
+    function(){
+      const n=rand(1,5);const sum=n*2;
+      const wrongs=shuffle([sum-1,sum+1,sum+2].filter(x=>x!==sum&&x>0)).slice(0,3);
+      return{teach:`${hero} says: Doubles means the SAME number twice! 3 + 3 = 6!`,
+        question:`${n} + ${n} = ?`,
+        visual:`<div class="emoji-count">${Array(n).fill(te).join(" ")}  ➕  ${Array(n).fill(te).join(" ")}</div>`,
+        answer:String(sum),type:"choice",choices:shuffle([String(sum),...wrongs.map(String)]),level:"Warm-Up",
+        hint1:`Both sides have ${n}. Count them all!`,
+        explanation:`${n} + ${n} = ${sum}! Double power! ${emoji} ⭐`};
+    },
+    // 10. True or false equation
+    function(){
+      const a=rand(1,5),b=rand(1,5);const realSum=a+b;
+      const isTrue=Math.random()<0.5;
+      const shown=isTrue?realSum:realSum+pick([-1,1,2]);
+      return{teach:`${hero} says: Check the math! Does the answer match what you get when you add?`,
+        question:`Is this correct? ${a} + ${b} = ${shown}`,
+        type:"yesno",correctAnswer:isTrue?"yes":"no",level:"Building Up",
+        hint1:`Count ${a} + ${b} on your fingers. Do you get ${shown}?`,
+        explanation:isTrue?`Yes! ${a} + ${b} does equal ${shown}! ${emoji} ⭐`:`No! ${a} + ${b} = ${realSum}, not ${shown}! ${emoji} ⭐`};
+    }
+  ];
+  return pick(G)();
+}
+
 // ============ MAVERICK'S TOPICS ============
 const MAV_TOPICS=[
   {id:"alphabet",name:"Alphabet Adventure",icon:"🔤",desc:"Letters, sounds & words",gen:genAlphabet,
    takeaway:"Every letter has a name, a sound, and a shape. Keep practicing and you'll know them all!"},
-  {id:"sightwords",name:"Sight Words",icon:"📖",desc:"Read words by sight",gen:genSightWords,
+  {id:"lettersounds",name:"Letter Sounds",icon:"🔊",desc:"Learn the sounds letters make",gen:genLetterSounds,
+   takeaway:"Every letter makes a special sound. When you know the sounds, you can read ANY word!"},
+  {id:"sightwords",name:"Sight Words",icon:"📖",desc:"Match words to pictures",gen:genSightWords,
    takeaway:"Sight words are words you see all the time. The more you practice, the faster you'll read!"},
+  {id:"comprehension",name:"Story Time",icon:"📚",desc:"Read & answer questions",gen:genComprehension,
+   takeaway:"Good readers think about what they read. Read carefully and you'll find all the answers!"},
+  {id:"counting",name:"Count to 100",icon:"💯",desc:"Count by ones and tens",gen:genCounting,
+   takeaway:"Numbers go in order all the way to 100! Practice counting every day and you'll be a counting champion!"},
   {id:"kmath",name:"Math Heroes",icon:"🔢",desc:"Counting, adding & subtracting",gen:genKMath,
-   takeaway:"Math is like a superpower! Count carefully, add groups together, and subtract to take away!"}
+   takeaway:"Math is like a superpower! Count carefully, add groups together, and subtract to take away!"},
+  {id:"addsub",name:"Add & Subtract",icon:"➕",desc:"Number bonds & fact families",gen:genAddSub,
+   takeaway:"Adding puts things together, subtracting takes them away. Practice makes perfect!"}
 ];
 
 // ============ STATE ============
