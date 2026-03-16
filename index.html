@@ -109,6 +109,24 @@
   .pic-choice-btn:hover{border-color:#0076B6;background:#f0f9ff;transform:scale(1.03)}
   .pic-choice-btn svg{max-width:100%;height:auto}
   .sight-word-display{font-family:'Fredoka',sans-serif;font-size:72px;font-weight:700;text-align:center;color:#1A1A2E;letter-spacing:3px;padding:16px}
+  .subject-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+  .subject-btn{background:linear-gradient(135deg,#f8fafc,#e2e8f0);border:3px solid #cbd5e1;border-radius:16px;padding:24px 16px;cursor:pointer;text-align:center;transition:all .2s;font-family:'Fredoka',sans-serif}
+  .subject-btn:hover{border-color:#0076B6;transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+  .subject-btn .subj-icon{font-size:42px;margin-bottom:8px;display:block}
+  .subject-btn .subj-name{font-size:18px;font-weight:700;color:#1A1A2E}
+  .subject-btn .subj-count{font-size:12px;color:#64748b;margin-top:4px}
+  .order-game{width:100%;margin-bottom:16px}
+  .order-track{display:flex;flex-wrap:wrap;gap:6px;min-height:50px;max-height:150px;overflow-y:auto;padding:12px;background:#f0fdf4;border:2px dashed #86efac;border-radius:12px;margin-bottom:16px;align-items:center;justify-content:center}
+  .order-track .placed{background:#22C55E;color:white;padding:6px 12px;border-radius:8px;font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;animation:popIn .2s ease-out}
+  @keyframes popIn{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+  .number-bank{display:flex;flex-wrap:wrap;gap:6px;padding:12px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;align-items:center;justify-content:center;max-height:300px;overflow-y:auto}
+  .num-tile{padding:6px 10px;border-radius:8px;cursor:pointer;font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;background:#fff;border:2px solid #cbd5e1;color:#1e293b;transition:all .15s;user-select:none;min-width:36px;text-align:center}
+  .num-tile:hover{border-color:#0076B6;background:#f0f9ff;transform:scale(1.05)}
+  .num-tile.wrong-tap{animation:shake .3s ease-in-out;border-color:#ef4444;background:#fef2f2}
+  .num-tile.correct-tap{background:#22C55E;color:white;border-color:#16A34A;pointer-events:none;opacity:0.5;transform:scale(0.9)}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .order-prompt{font-family:'Fredoka',sans-serif;font-size:20px;color:#1A1A2E;text-align:center;margin-bottom:12px;font-weight:700}
+  .order-progress{font-family:'Fredoka',sans-serif;font-size:14px;color:#64748b;text-align:center;margin-bottom:8px}
 
   /* ===== MAVERICK STYLES ===== */
   .mav .hero{background:linear-gradient(135deg,#1A1A2E,#E23636);border-bottom:4px solid #FFD700}
@@ -1575,115 +1593,33 @@ function genLetterSounds(){
   return pick(G)();
 }
 
-// ======== COUNTING TO 100 ========
+// ======== COUNTING TO 100 (tap-in-order) ========
 function genCounting(){
+  // This is called by generateQuiz which expects a single question per call.
+  // We use a counter to cycle through the 3 types: by 1s, by 5s, by 10s
+  if(!genCounting._call)genCounting._call=0;
+  const idx=genCounting._call%3;
+  genCounting._call++;
   const hero=pick(HEROES);const emoji=HERO_EMOJI[hero];
-  const G=[
-    // 1. What number comes next? (ones, 1-20)
-    function(){
-      const n=rand(1,19);const answer=n+1;
-      const wrongs=shuffle([n-1,n+2,n+3].filter(x=>x>=0&&x!==answer)).slice(0,3);
-      return{teach:`${hero} says: Numbers go in order! Count up one at a time: 1, 2, 3...`,
-        question:`What number comes after ${n}?`,
-        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Warm-Up",
-        hint1:`Count: ${n}... what's the next one?`,
-        explanation:`${n}, ${answer}! ${emoji} ⭐`};
-    },
-    // 2. What number comes next? (ones, 20-99)
-    function(){
-      const n=rand(20,98);const answer=n+1;
-      const wrongs=shuffle([n-1,n+2,n+10].filter(x=>x!==answer&&x>0&&x<=100)).slice(0,3);
-      return{teach:`${hero} says: Even big numbers go in order! After 29 comes 30, after 49 comes 50!`,
-        question:`What number comes after ${n}?`,
-        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Building Up",
-        hint1:`Count: ${n}... what's next? Think about the pattern!`,
-        explanation:`${n}, ${answer}! Big number hero! ${emoji} ⭐`};
-    },
-    // 3. Count by tens
-    function(){
-      const start=rand(1,8)*10;const answer=start+10;
-      const wrongs=shuffle([start-10,start+20,start+5].filter(x=>x>0&&x<=100&&x!==answer)).slice(0,3);
-      return{teach:`${hero} says: Counting by 10s is like taking big jumps! 10, 20, 30, 40...`,
-        question:`Count by 10s: ${start-10}, ${start}, ___`,
-        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Warm-Up",
-        hint1:`You're counting by 10s. What comes 10 after ${start}?`,
-        explanation:`${start-10}, ${start}, ${answer}! Counting by 10s! ${emoji} ⭐`};
-    },
-    // 4. Fill in the missing number (small range)
-    function(){
-      const start=rand(1,17);
-      const missing=start+1;
-      return{teach:`${hero} says: If you know the numbers around it, you can figure out the missing one!`,
-        question:`Fill in the blank: ${start}, ___, ${start+2}`,
-        answer:String(missing),type:"choice",choices:shuffle([String(missing),String(missing+1),String(missing-1),String(missing+2)]),level:"Warm-Up",
-        hint1:`What number is between ${start} and ${start+2}?`,
-        explanation:`${start}, ${missing}, ${start+2}! You found it! ${emoji} ⭐`};
-    },
-    // 5. Fill in the missing number (bigger range)
-    function(){
-      const start=rand(20,96);
-      const missing=start+1;
-      return{teach:`${hero} says: Even with bigger numbers, the pattern is the same — count one more!`,
-        question:`Fill in the blank: ${start}, ___, ${start+2}`,
-        answer:String(missing),type:"choice",choices:shuffle([String(missing),String(missing+1),String(missing-1),String(start+10)].filter((v,i,a)=>a.indexOf(v)===i)).slice(0,4),level:"Building Up",
-        hint1:`What number comes right after ${start}?`,
-        explanation:`${start}, ${missing}, ${start+2}! ${emoji} ⭐`};
-    },
-    // 6. Count backwards
-    function(){
-      const n=rand(5,20);const answer=n-1;
-      const wrongs=shuffle([n+1,n-2,n-3].filter(x=>x>=0&&x!==answer)).slice(0,3);
-      return{teach:`${hero} says: Counting backwards is like a rocket launch! 5, 4, 3, 2, 1... BLAST OFF!`,
-        question:`Count backwards: ${n+1}, ${n}, ___`,
-        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Building Up",
-        hint1:`You're going down: ${n+1}, ${n}... what comes next going down?`,
-        explanation:`${n+1}, ${n}, ${answer}! Great backwards counting! ${emoji} ⭐`};
-    },
-    // 7. Which number is bigger?
-    function(){
-      let a=rand(1,50),b=rand(1,50);while(a===b)b=rand(1,50);
-      const answer=String(Math.max(a,b));
-      return{teach:`${hero} says: The bigger number is the one you say LATER when counting! 50 is bigger than 20!`,
-        question:`Which number is BIGGER: ${a} or ${b}?`,
-        answer:answer,type:"choice",choices:[String(a),String(b)],level:"Warm-Up",
-        hint1:`When you count, which number do you say later — ${a} or ${b}?`,
-        explanation:`${answer} is bigger! ${emoji} ⭐`};
-    },
-    // 8. Count by 10s starting from a number
-    function(){
-      const start=rand(1,9);
-      const seq=[start,start+10,start+20];const answer=start+30;
-      const wrongs=shuffle([start+40,start+20,answer+10].filter(x=>x!==answer&&x<=100)).slice(0,3);
-      return{teach:`${hero} says: You can count by 10s starting from ANY number! ${start}, ${start+10}, ${start+20}...`,
-        question:`Count by 10s: ${seq.join(", ")}, ___`,
-        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Challenge",
-        hint1:`Add 10 more to ${start+20}!`,
-        explanation:`${seq.join(", ")}, ${answer}! Skip counting master! ${emoji} ⭐`};
-    },
-    // 9. How many tens and ones?
-    function(){
-      const tens=rand(1,9);const ones=rand(0,9);const num=tens*10+ones;
-      const answers=[`${tens} tens and ${ones} ones`];
-      const wrongs=shuffle([`${ones} tens and ${tens} ones`,`${tens+1} tens and ${ones} ones`,`${tens} tens and ${ones+1} ones`].filter(w=>!answers.includes(w))).slice(0,3);
-      return{teach:`${hero} says: Numbers are made of TENS and ONES! 34 = 3 tens and 4 ones!`,
-        question:`How many tens and ones in ${num}?`,
-        visual:`<div style="font-size:56px;text-align:center;font-family:Fredoka,sans-serif">${num}</div>`,
-        answer:answers[0],type:"choice",choices:shuffle([answers[0],...wrongs]),level:"Challenge",
-        hint1:`The first digit (${tens}) tells you the tens. The second digit (${ones}) tells you the ones!`,
-        explanation:`${num} = ${tens} tens and ${ones} ones! ${emoji} ⭐`};
-    },
-    // 10. What comes after 100s boundary?
-    function(){
-      const boundary=pick([9,19,29,39,49,59,69,79,89]);const answer=boundary+1;
-      const wrongs=shuffle([boundary-1,boundary+2,boundary+11].filter(x=>x!==answer&&x>0&&x<=100)).slice(0,3);
-      return{teach:`${hero} says: The tricky part is crossing to a new group of 10! After 29 comes 30, after 39 comes 40!`,
-        question:`What number comes after ${boundary}?`,
-        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Challenge",
-        hint1:`${boundary} is the LAST number in the ${Math.floor(boundary/10)*10}s. What group comes next?`,
-        explanation:`After ${boundary} comes ${answer}! You crossed into the ${answer}s! ${emoji} ⭐`};
-    }
-  ];
-  return pick(G)();
+  if(idx===0){
+    const nums=[];for(let i=1;i<=100;i++)nums.push(i);
+    return{teach:`${hero} says: Numbers go in order — 1, 2, 3 all the way to 100! Tap them in the right order!`,
+      question:"Count by 1s — tap the numbers in order from 1 to 100!",
+      type:"order",sequence:nums,level:"Warm-Up",
+      explanation:`You counted all the way to 100! ${emoji} AMAZING! 🌟⭐🌟`};
+  } else if(idx===1){
+    const nums=[];for(let i=5;i<=100;i+=5)nums.push(i);
+    return{teach:`${hero} says: Count by 5s — skip over the numbers in between! 5, 10, 15, 20...`,
+      question:"Count by 5s — tap the numbers in order!",
+      type:"order",sequence:nums,level:"Building Up",
+      explanation:`You counted by 5s all the way to 100! ${emoji} SUPER! 🌟⭐🌟`};
+  } else {
+    const nums=[];for(let i=10;i<=100;i+=10)nums.push(i);
+    return{teach:`${hero} says: Count by 10s — big jumps! 10, 20, 30, 40...`,
+      question:"Count by 10s — tap the numbers in order!",
+      type:"order",sequence:nums,level:"Warm-Up",
+      explanation:`You counted by 10s to 100! ${emoji} HERO! 🌟⭐🌟`};
+  }
 }
 
 // ======== READING COMPREHENSION ========
@@ -1836,36 +1772,47 @@ function genAddSub(){
   return pick(G)();
 }
 
-// ============ MAVERICK'S TOPICS ============
-const MAV_TOPICS=[
-  {id:"alphabet",name:"Alphabet Adventure",icon:"🔤",desc:"Letters, sounds & words",gen:genAlphabet,
-   takeaway:"Every letter has a name, a sound, and a shape. Keep practicing and you'll know them all!"},
-  {id:"lettersounds",name:"Letter Sounds",icon:"🔊",desc:"Learn the sounds letters make",gen:genLetterSounds,
-   takeaway:"Every letter makes a special sound. When you know the sounds, you can read ANY word!"},
-  {id:"sightwords",name:"Sight Words",icon:"📖",desc:"Match words to pictures",gen:genSightWords,
-   takeaway:"Sight words are words you see all the time. The more you practice, the faster you'll read!"},
-  {id:"comprehension",name:"Story Time",icon:"📚",desc:"Read & answer questions",gen:genComprehension,
-   takeaway:"Good readers think about what they read. Read carefully and you'll find all the answers!"},
-  {id:"counting",name:"Count to 100",icon:"💯",desc:"Count by ones and tens",gen:genCounting,
-   takeaway:"Numbers go in order all the way to 100! Practice counting every day and you'll be a counting champion!"},
-  {id:"kmath",name:"Math Heroes",icon:"🔢",desc:"Counting, adding & subtracting",gen:genKMath,
-   takeaway:"Math is like a superpower! Count carefully, add groups together, and subtract to take away!"},
-  {id:"addsub",name:"Add & Subtract",icon:"➕",desc:"Number bonds & fact families",gen:genAddSub,
-   takeaway:"Adding puts things together, subtracting takes them away. Practice makes perfect!"}
+// ============ MAVERICK'S SUBJECTS & TOPICS ============
+const MAV_SUBJECTS=[
+  {id:"reading",name:"Reading",icon:"📚",topics:[
+    {id:"alphabet",name:"Alphabet Adventure",icon:"🔤",desc:"Letters, sounds & words",gen:genAlphabet,
+     takeaway:"Every letter has a name, a sound, and a shape. Keep practicing and you'll know them all!"},
+    {id:"lettersounds",name:"Letter Sounds",icon:"🔊",desc:"Learn the sounds letters make",gen:genLetterSounds,
+     takeaway:"Every letter makes a special sound. When you know the sounds, you can read ANY word!"},
+    {id:"sightwords",name:"Sight Words",icon:"📖",desc:"Match words to pictures",gen:genSightWords,
+     takeaway:"Sight words are words you see all the time. The more you practice, the faster you'll read!"},
+    {id:"comprehension",name:"Story Time",icon:"📚",desc:"Read & answer questions",gen:genComprehension,
+     takeaway:"Good readers think about what they read. Read carefully and you'll find all the answers!"}
+  ]},
+  {id:"math",name:"Math",icon:"🔢",topics:[
+    {id:"counting",name:"Count to 100",icon:"💯",desc:"Put numbers in order!",gen:genCounting,numQ:3,
+     takeaway:"Numbers go in order all the way to 100! Practice counting every day and you'll be a counting champion!"},
+    {id:"kmath",name:"Math Heroes",icon:"🦸",desc:"Counting, adding & subtracting",gen:genKMath,
+     takeaway:"Math is like a superpower! Count carefully, add groups together, and subtract to take away!"},
+    {id:"addsub",name:"Add & Subtract",icon:"➕",desc:"Number bonds & fact families",gen:genAddSub,
+     takeaway:"Adding puts things together, subtracting takes them away. Practice makes perfect!"}
+  ]}
 ];
+// Flat list for compatibility
+const MAV_TOPICS=MAV_SUBJECTS.flatMap(s=>s.topics);
 
 // ============ STATE ============
 const TEAM_CONFETTI=["#0076B6","#B0B7BC","#FA4616","#FFCB05","#00274C","#0C2340"];
 const MAX_QUESTIONS=20;
 const MAV_QUESTIONS=10;
-let S={screen:"landing",player:"none",topic:null,questions:[],qIndex:0,input:"",hintsUsed:0,feedback:null,score:0,attempts:0,results:[]};
+let S={screen:"landing",player:"none",subject:null,topic:null,questions:[],qIndex:0,input:"",hintsUsed:0,feedback:null,score:0,attempts:0,results:[]};
 
 function confetti(colors){
   const c=colors||TEAM_CONFETTI;
   for(let i=0;i<35;i++){const el=document.createElement("div");el.className="confetti-piece";const s=6+Math.random()*8;el.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s}px;background:${c[i%c.length]};border-radius:${Math.random()>.5?"50%":"2px"};animation-delay:${Math.random()*.5}s;`;document.body.appendChild(el);setTimeout(()=>el.remove(),3000)}
 }
 
-function getNumQ(){return S.player==="max"?MAX_QUESTIONS:MAV_QUESTIONS}
+function getNumQ(){
+  if(S.player==="max")return MAX_QUESTIONS;
+  const topic=MAV_TOPICS.find(t=>t.id===S.topic);
+  if(topic&&topic.numQ)return topic.numQ;
+  return MAV_QUESTIONS;
+}
 function getTopics(){return S.player==="max"?TOPICS:MAV_TOPICS}
 function getMaxHints(){return S.player==="max"?2:1}
 function getMaxAttempts(){return S.player==="max"?3:2}
@@ -1937,7 +1884,7 @@ function render(){
           <span class="pc-emoji">🦸</span>
           <span class="pc-name">MAV</span>
           <span class="pc-grade">Kindergarten</span>
-          <span class="pc-desc">ABCs • Words • Math</span>
+          <span class="pc-desc">Reading • Math</span>
         </div>
       </div>
     </div>`;
@@ -1947,20 +1894,22 @@ function render(){
   // === HOME ===
   if(S.screen==="home"){
     const topics=getTopics();
-    const topicBtns=topics.map(t=>`<div class="topic-btn" onclick="startTopic('${t.id}')"><span class="icon">${t.icon}</span><div class="name">${t.name}</div><div class="desc">${t.desc}</div></div>`).join("");
     const wrapper=isMav?'<div class="mav">':"<div>";
     if(isMav){
+      // Show subjects for Mav
+      const subjBtns=MAV_SUBJECTS.map(s=>`<div class="subject-btn" onclick="pickSubject('${s.id}')"><span class="subj-icon">${s.icon}</span><div class="subj-name">${s.name}</div><div class="subj-count">${s.topics.length} activities</div></div>`).join("");
       app.innerHTML=`${wrapper}<div class="card">
         <div class="hero">
           <div class="tagline">Kindergarten Hero</div>
           <div class="player-name">MAV</div>
-          <div class="jersey">🦸 Pick an adventure and let's learn!</div>
+          <div class="jersey">🦸 Pick a subject and let's learn!</div>
         </div>
-        <h3 style="font-family:'Fredoka',sans-serif;color:#1A1A2E;font-size:18px;margin-bottom:14px;text-align:center">CHOOSE YOUR MISSION</h3>
-        <div class="topic-grid">${topicBtns}</div>
+        <h3 style="font-family:'Fredoka',sans-serif;color:#1A1A2E;font-size:18px;margin-bottom:14px;text-align:center">CHOOSE YOUR SUBJECT</h3>
+        <div class="subject-grid">${subjBtns}</div>
         <div style="text-align:center"><button class="btn-back" onclick="goLanding()">← Switch Player</button></div>
       </div></div>`;
     } else {
+      const topicBtns=topics.map(t=>`<div class="topic-btn" onclick="startTopic('${t.id}')"><span class="icon">${t.icon}</span><div class="name">${t.name}</div><div class="desc">${t.desc}</div></div>`).join("");
       app.innerHTML=`<div class="card">
         <div class="hero">
           <div class="tagline">6th Grade Math</div>
@@ -1972,6 +1921,23 @@ function render(){
         <div style="text-align:center"><button class="btn-back" onclick="goLanding()">← Switch Player</button></div>
       </div>`;
     }
+    return;
+  }
+
+  // === MAV SUBJECT TOPICS ===
+  if(S.screen==="subject-topics"&&isMav){
+    const subj=MAV_SUBJECTS.find(s=>s.id===S.subject);
+    const topicBtns=subj.topics.map(t=>`<div class="topic-btn" onclick="startTopic('${t.id}')"><span class="icon">${t.icon}</span><div class="name">${t.name}</div><div class="desc">${t.desc}</div></div>`).join("");
+    app.innerHTML=`<div class="mav"><div class="card">
+      <div class="hero">
+        <div class="tagline">Kindergarten Hero</div>
+        <div class="player-name">MAV</div>
+        <div class="jersey">${subj.icon} ${subj.name} Missions</div>
+      </div>
+      <h3 style="font-family:'Fredoka',sans-serif;color:#1A1A2E;font-size:18px;margin-bottom:14px;text-align:center">PICK A MISSION</h3>
+      <div class="topic-grid">${topicBtns}</div>
+      <div style="text-align:center"><button class="btn-back" onclick="goHome()">← Back to Subjects</button></div>
+    </div></div>`;
     return;
   }
 
@@ -2071,6 +2037,62 @@ function render(){
   const levelLabel=isMav?`Question ${S.qIndex+1}`:q.level;
   const headerFont=isMav?"Fredoka":"Russo One";
 
+  // === ORDER TYPE (tap-in-order counting game) ===
+  if(q.type==="order"){
+    if(!q._placed)q._placed=[];
+    if(!q._scrambled)q._scrambled=shuffle([...q.sequence]);
+    const total=q.sequence.length;
+    const placedHTML=q._placed.map(n=>`<span class="placed">${n}</span>`).join("");
+    const bankHTML=q._scrambled.filter(n=>!q._placed.includes(n)).map(n=>`<div class="num-tile" data-num="${n}">${n}</div>`).join("");
+    const orderDone=q._placed.length===total;
+    let orderFb="";
+    if(orderDone){
+      orderFb=`<div class="feedback correct"><p>🌟 SUPER! ${q.explanation}</p></div>`;
+      if(!q._scored){q._scored=true;S.score++;confetti(getConfettiColors());S.results.push({correct:true,hintsUsed:0,attempts:1});}
+    }
+    const nxBtn=orderDone?`<button class="btn-next" onclick="next()">${S.qIndex+1<numQ?"NEXT! →":"SEE RESULTS! 🌟"}</button>`:"";
+    app.innerHTML=`${wrapper}<div class="card">
+      <div class="header-bar">
+        <div class="logo">${topic.icon}</div>
+        <div class="title-area"><h2 style="font-family:'Fredoka',sans-serif">${topic.name}</h2><div class="subtitle">Q${S.qIndex+1} of ${numQ}</div></div>
+        <div class="score-badge">${S.score} ⭐</div>
+      </div>
+      <div class="streak-bar">${streakDots()}</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${(S.qIndex/numQ)*100}%"></div></div>
+      <div class="teach-box"><p>🦸 <strong>Hero Tip:</strong> ${q.teach}</p></div>
+      <div class="order-game">
+        <div class="order-prompt">${q.question}</div>
+        <div class="order-progress">${q._placed.length} of ${total} placed</div>
+        <div class="order-track" id="order-track">${placedHTML||'<span style="color:#94a3b8;font-style:italic">Tap the first number to start!</span>'}</div>
+        ${orderDone?"":`<div class="number-bank" id="number-bank">${bankHTML}</div>`}
+      </div>
+      ${orderFb}${nxBtn}
+      <div style="text-align:center"><button class="btn-back" onclick="goHome()">← Back to missions</button></div>
+    </div></div>`;
+    // Attach tap listeners
+    if(!orderDone){
+      const bank=document.getElementById("number-bank");
+      if(bank)bank.addEventListener("click",function(e){
+        const tile=e.target.closest(".num-tile");
+        if(!tile)return;
+        const num=Number(tile.dataset.num);
+        const expected=q.sequence[q._placed.length];
+        if(num===expected){
+          tile.classList.add("correct-tap");
+          q._placed.push(num);
+          setTimeout(()=>render(),200);
+        }else{
+          tile.classList.add("wrong-tap");
+          setTimeout(()=>tile.classList.remove("wrong-tap"),400);
+        }
+      });
+      // Auto-scroll track to bottom
+      const track=document.getElementById("order-track");
+      if(track)track.scrollTop=track.scrollHeight;
+    }
+    return;
+  }
+
   app.innerHTML=`${wrapper}<div class="card">
     <div class="header-bar">
       <div class="logo">${topic.icon}</div>
@@ -2091,14 +2113,17 @@ function render(){
 }
 
 // ============ ACTIONS ============
-function goLanding(){S={screen:"landing",player:"none",topic:null,questions:[],qIndex:0,input:"",hintsUsed:0,feedback:null,score:0,attempts:0,results:[]};render()}
+function goLanding(){S={screen:"landing",player:"none",subject:null,topic:null,questions:[],qIndex:0,input:"",hintsUsed:0,feedback:null,score:0,attempts:0,results:[]};render()}
 
 function pickPlayer(p){S.player=p;S.screen="home";render()}
 
-function goHome(){S.screen="home";S.topic=null;S.questions=[];S.qIndex=0;S.input="";S.hintsUsed=0;S.feedback=null;S.score=0;S.attempts=0;S.results=[];render()}
+function pickSubject(id){S.subject=id;S.screen="subject-topics";render()}
+
+function goHome(){S.screen="home";S.subject=null;S.topic=null;S.questions=[];S.qIndex=0;S.input="";S.hintsUsed=0;S.feedback=null;S.score=0;S.attempts=0;S.results=[];render()}
 
 function startTopic(id){
-  S={screen:"quiz",player:S.player,topic:id,questions:generateQuiz(id),qIndex:0,input:"",hintsUsed:0,feedback:null,score:0,attempts:0,results:[]};
+  genCounting._call=0;// reset ordering cycle
+  S={screen:"quiz",player:S.player,subject:S.subject,topic:id,questions:generateQuiz(id),qIndex:0,input:"",hintsUsed:0,feedback:null,score:0,attempts:0,results:[]};
   render();
 }
 
