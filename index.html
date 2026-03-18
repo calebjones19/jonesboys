@@ -133,6 +133,13 @@
   .topic-btn.retake .desc{color:#991b1b}
   .topic-btn.retake:hover{border-color:#dc2626;background:linear-gradient(135deg,#fee2e2,#fecaca);transform:translateY(-3px)}
   @keyframes retakePulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+  .answer-key{background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:20px;text-align:left;max-height:400px;overflow-y:auto}
+  .answer-key h3{margin-bottom:12px;font-size:15px;color:#dc2626;font-weight:700}
+  .ak-item{padding:12px;margin-bottom:10px;border-radius:10px;border-left:4px solid #ef4444;background:#fff1f2}
+  .ak-item .ak-q{font-size:13px;color:#1e293b;font-weight:600;margin-bottom:4px}
+  .ak-item .ak-your{font-size:12px;color:#991b1b;margin-bottom:2px}
+  .ak-item .ak-correct{font-size:12px;color:#166534;font-weight:700;margin-bottom:4px}
+  .ak-item .ak-explain{font-size:12px;color:#64748b;line-height:1.5;padding:8px;background:#f0fdf4;border-radius:6px;margin-top:4px}
   .order-progress{font-family:'Fredoka',sans-serif;font-size:14px;color:#64748b;text-align:center;margin-bottom:8px}
 
   /* ===== MAVERICK STYLES ===== */
@@ -2032,8 +2039,8 @@ function getNumQ(){
   return MAV_QUESTIONS;
 }
 function getTopics(){return S.player==="max"?TOPICS:MAV_TOPICS}
-function getMaxHints(){return S.player==="max"?2:1}
-function getMaxAttempts(){return S.player==="max"?3:2}
+function getMaxHints(){return S.player==="max"?0:1}
+function getMaxAttempts(){return S.player==="max"?2:2}
 function getConfettiColors(){return S.player==="max"?TEAM_CONFETTI:MAV_CONFETTI}
 
 function generateQuiz(topicId){
@@ -2194,13 +2201,30 @@ function render(){
       const msg=pct>=80?"MVP performance, Max! You crushed it!":pct>=60?"Solid game! A few more reps and you'll have it locked down.":"Good first drive! Every great player needs practice. Run it back!";
       const grad=pct>=80?"linear-gradient(135deg,#4ade80,#22c55e)":pct>=60?"linear-gradient(135deg,#FFCB05,#fbbf24)":"linear-gradient(135deg,#FA4616,#f87171)";
       if(pct>=80)confetti();
-      const rows=S.results.map((r,i)=>`<div class="result-row"><span class="icon">${r.correct?"✅":"❌"}</span><span class="q-text">Q${i+1}: ${S.questions[i].question.slice(0,50)}...</span><span class="hints">${r.hintsUsed>0?r.hintsUsed+" hint"+(r.hintsUsed>1?"s":""):"No hints"}</span></div>`).join("");
+      const rows=S.results.map((r,i)=>`<div class="result-row"><span class="icon">${r.correct?"✅":"❌"}</span><span class="q-text">Q${i+1}: ${S.questions[i].question.slice(0,50)}...</span><span class="hints">${r.correct?"Correct":"Missed"}</span></div>`).join("");
+      // Build answer key for wrong answers
+      const wrongItems=S.results.map((r,i)=>({r,i})).filter(x=>!x.r.correct);
+      let answerKey="";
+      if(wrongItems.length>0){
+        const akRows=wrongItems.map(x=>{
+          const q=S.questions[x.i];
+          const correctAns=q.type==="yesno"?q.correctAnswer:(q.answer||"");
+          return`<div class="ak-item">
+            <div class="ak-q">Q${x.i+1}: ${q.question}</div>
+            <div class="ak-your">Your answer: ${x.r.userAnswer||"—"}</div>
+            <div class="ak-correct">Correct answer: ${correctAns}</div>
+            <div class="ak-explain">${q.explanation}</div>
+          </div>`;
+        }).join("");
+        answerKey=`<div class="answer-key"><h3>📝 Answer Key — Review These!</h3>${akRows}</div>`;
+      }
       app.innerHTML=`<div class="card"><div style="text-align:center;padding:20px 0">
         <div style="font-size:56px;margin-bottom:8px">${emoji2}</div>
         <h1 style="font-family:'Russo One',sans-serif;font-size:24px;color:#0C2340">FINAL SCORE</h1>
         <div class="result-score" style="background:${grad};-webkit-background-clip:text;background-clip:text">${S.score} / ${numQ}</div>
         <p style="font-size:15px;color:#64748b;margin-bottom:20px;line-height:1.5">${msg}</p>
         <div class="results-box"><h3>📋 Game Stats</h3>${rows}</div>
+        ${answerKey}
         <div class="takeaway"><h3>🔑 Playbook Takeaway</h3><p>${topic.takeaway}</p></div>
         <button class="btn-start" onclick="startTopic('${S.topic}')" style="margin-bottom:10px">RUN IT BACK 🔄</button>
         <button class="btn-back" onclick="goHome()">PICK A DIFFERENT TOPIC</button>
@@ -2367,17 +2391,17 @@ function check(v){
   if(ok){
     S.score++;confetti(getConfettiColors());
     S.feedback={type:"correct",msg:q.explanation};
-    S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:S.attempts+1});
+    S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:S.attempts+1,userAnswer:uv});
   } else {
     S.attempts++;
     if(S.attempts>=maxAttempts&&S.hintsUsed>=maxHints){
       S.feedback={type:"showAnswer",msg:q.explanation};
-      S.results.push({correct:false,hintsUsed:S.hintsUsed,attempts:S.attempts});
+      S.results.push({correct:false,hintsUsed:S.hintsUsed,attempts:S.attempts,userAnswer:uv});
     } else {
       if(isMav){
         S.feedback={type:"tryAgain",msg:S.attempts===1?"Almost! Try again — grab a hint! 💡":"One more try! You can do it, hero! 💪"};
       } else {
-        S.feedback={type:"tryAgain",msg:S.attempts===1?"Incomplete pass! Try again — grab a hint below 👇":"Almost had it! One more shot, or use a hint."};
+        S.feedback={type:"tryAgain",msg:S.attempts===1?"Incomplete pass! Try again.":"Almost had it! One more shot."};
       }
     }
   }
