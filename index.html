@@ -126,6 +126,13 @@
   .num-tile.correct-tap{background:#22C55E;color:white;border-color:#16A34A;pointer-events:none;opacity:0.5;transform:scale(0.9)}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
   .order-prompt{font-family:'Fredoka',sans-serif;font-size:20px;color:#1A1A2E;text-align:center;margin-bottom:12px;font-weight:700}
+  .topic-btn.retake{grid-column:1/-1;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:3px solid #ef4444;animation:retakePulse 2s ease-in-out infinite;position:relative;overflow:hidden}
+  .topic-btn.retake::before{content:'⚡ RETAKE PREP ⚡';position:absolute;top:0;left:0;right:0;background:#ef4444;color:white;font-size:10px;font-weight:800;letter-spacing:2px;padding:3px 0;text-transform:uppercase}
+  .topic-btn.retake .icon{margin-top:14px}
+  .topic-btn.retake .name{color:#dc2626;font-size:16px}
+  .topic-btn.retake .desc{color:#991b1b}
+  .topic-btn.retake:hover{border-color:#dc2626;background:linear-gradient(135deg,#fee2e2,#fecaca);transform:translateY(-3px)}
+  @keyframes retakePulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
   .order-progress{font-family:'Fredoka',sans-serif;font-size:14px;color:#64748b;text-align:center;margin-bottom:8px}
 
   /* ===== MAVERICK STYLES ===== */
@@ -1183,7 +1190,218 @@ function genStats(){
   return pick(G)();
 }
 // ============ TOPIC CONFIG ============
+// ======== RETAKE PREP: Ratios Quiz 5 (6.RP.A.1, 6.RP.A.3a) ========
+function genRetakeRatios(){
+  const G=[
+    // === SKILL 1: Write a ratio (part-to-part) ===
+    function(){
+      const scenarios=[
+        {ctx:"Dalia has",a:"dogs",na:5,b:"cats",nb:4},{ctx:"A bag has",a:"red marbles",na:6,b:"blue marbles",nb:8},
+        {ctx:"A class has",a:"boys",na:12,b:"girls",nb:15},{ctx:"A farm has",a:"cows",na:3,b:"pigs",nb:7},
+        {ctx:"A bowl has",a:"apples",na:8,b:"oranges",nb:5},{ctx:"A team has",a:"forwards",na:4,b:"guards",nb:6},
+        {ctx:"A store sold",a:"shirts",na:9,b:"pants",nb:3},{ctx:"A garden has",a:"roses",na:10,b:"tulips",nb:6}
+      ];
+      const s=pick(scenarios);
+      const answer=`${s.na}:${s.nb}`;
+      const wrongs=[`${s.nb}:${s.na}`,`${s.na}:${s.na+s.nb}`,`${s.nb}:${s.na+s.nb}`];
+      return{teach:`A part-to-part ratio compares one group to another group. Order matters! "${s.a} to ${s.b}" means ${s.a} come FIRST.`,
+        question:`${s.ctx} ${s.na} ${s.a} and ${s.nb} ${s.b}. What is the ratio of ${s.a} to ${s.b}?`,
+        answer:answer,type:"choice",choices:shuffle([answer,...wrongs]),level:"Warm-Up",
+        hint1:`Part-to-part: put ${s.a} first, ${s.b} second.`,
+        hint2:`${s.na} ${s.a} TO ${s.nb} ${s.b} → ${s.na}:___`,
+        explanation:`The ratio of ${s.a} to ${s.b} is ${s.na}:${s.nb} (or ${s.na} to ${s.nb}, or ${s.na}/${s.nb}). ✅`};
+    },
+    // === SKILL 2: Write a ratio (part-to-whole) ===
+    function(){
+      const scenarios=[
+        {ctx:"Dalia has",a:"dogs",na:5,b:"cats",nb:4},{ctx:"A bag has",a:"red marbles",na:6,b:"blue marbles",nb:8},
+        {ctx:"A class has",a:"boys",na:12,b:"girls",nb:15},{ctx:"A shelf has",a:"fiction books",na:7,b:"nonfiction books",nb:3},
+        {ctx:"A plate has",a:"cookies",na:8,b:"brownies",nb:4},{ctx:"A park has",a:"oak trees",na:9,b:"maple trees",nb:6}
+      ];
+      const s=pick(scenarios);const total=s.na+s.nb;
+      const askFirst=Math.random()<0.5;
+      const part=askFirst?s.na:s.nb;const partName=askFirst?s.a:s.b;
+      const whole=askFirst?"total pets":"total items";
+      const answer=`${part}:${total}`;
+      const wrongs=[`${part}:${total-part}`,`${total}:${part}`,`${total-part}:${total}`];
+      return{teach:`A part-to-whole ratio compares one group to the TOTAL. Total = add both groups together. ${s.na} + ${s.nb} = ${total}.`,
+        question:`${s.ctx} ${s.na} ${s.a} and ${s.nb} ${s.b}. What is the ratio of ${partName} to the total number?`,
+        answer:answer,type:"choice",choices:shuffle([answer,...wrongs]),level:"Warm-Up",
+        hint1:`Part-to-whole: the "whole" is the total of both groups.`,
+        hint2:`Total = ${s.na} + ${s.nb} = ${total}. So the ratio is ${part}:___`,
+        explanation:`${part} ${partName} out of ${total} total → ${part}:${total} (or ${part}/${total}). ✅`};
+    },
+    // === SKILL 3: Part-to-part vs Part-to-whole identification ===
+    function(){
+      const na=rand(3,12),nb=rand(2,10);const total=na+nb;
+      const isPtP=Math.random()<0.5;
+      const ratio=isPtP?`${na}:${nb}`:`${na}:${total}`;
+      const items=pick([["dogs","cats","pets"],["boys","girls","students"],["apples","oranges","fruits"],["red","blue","marbles"]]);
+      const desc=isPtP?`${na} ${items[0]} to ${nb} ${items[1]}`:`${na} ${items[0]} to ${total} total ${items[2]}`;
+      const answer=isPtP?"Part-to-Part":"Part-to-Whole";
+      return{teach:`Part-to-Part compares a group to another group. Part-to-Whole compares a group to the TOTAL (both groups combined).`,
+        question:`Is the ratio "${desc}" a part-to-part or part-to-whole ratio?`,
+        answer:answer,type:"choice",choices:["Part-to-Part","Part-to-Whole"],level:"Warm-Up",
+        hint1:isPtP?"Are we comparing two separate groups, or one group to the total?":`The second number (${total}) is ${na}+${nb}. Does that mean it's the total?`,
+        hint2:isPtP?`${nb} is just the ${items[1]} — not the total. So it's part to ___`:`${total} = ${na} + ${nb}, which is the total. So it's part to ___`,
+        explanation:`${desc} is ${answer}. ${isPtP?`Both numbers are parts — ${items[0]} and ${items[1]}.`:`${total} is the total (${na}+${nb}), so we're comparing a part to the whole.`} ✅`};
+    },
+    // === SKILL 4: Complete a ratio table (find missing value) ===
+    function(){
+      const scenarios=[
+        {a:"Riders",b:"Minutes",r1a:23,r1b:11},{a:"Cups of coffee",b:"Glasses of OJ",r1a:12,r1b:10},
+        {a:"Notebooks",b:"Cost ($)",r1a:3,r1b:5},{a:"Miles",b:"Hours",r1a:6,r1b:1},
+        {a:"Cookies",b:"Batches",r1a:24,r1b:3},{a:"Pages",b:"Minutes",r1a:15,r1b:5}
+      ];
+      const s=pick(scenarios);
+      const mult=pick([2,3,4,5]);
+      const answer=s.r1a*mult;
+      const wrongs=shuffle([s.r1a*(mult+1),s.r1a*(mult-1),s.r1b*mult,answer+s.r1a].filter(w=>w!==answer&&w>0)).slice(0,3);
+      return{teach:`To find equivalent ratios in a table, multiply BOTH values by the same number (the scale factor). If ${s.a} = ${s.r1a} and ${s.b} = ${s.r1b}, multiply both by ${mult}.`,
+        question:`${s.a}: ${s.r1a}, ___ | ${s.b}: ${s.r1b}, ${s.r1b*mult}. What is the missing ${s.a} value?`,
+        visual:`<table style="width:100%;border-collapse:collapse;text-align:center;font-size:15px"><tr style="background:#0C2340;color:white"><td style="padding:8px;border:1px solid #334155">${s.a}</td><td style="padding:8px;border:1px solid #334155">${s.r1a}</td><td style="padding:8px;border:1px solid #334155;color:#FFCB05;font-weight:bold">?</td></tr><tr style="background:#1e293b;color:white"><td style="padding:8px;border:1px solid #334155">${s.b}</td><td style="padding:8px;border:1px solid #334155">${s.r1b}</td><td style="padding:8px;border:1px solid #334155">${s.r1b*mult}</td></tr></table>`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Building Up",
+        hint1:`What did they multiply ${s.r1b} by to get ${s.r1b*mult}?`,
+        hint2:`Scale factor: ${s.r1b} × ${mult} = ${s.r1b*mult}. Now do ${s.r1a} × ${mult} = ___`,
+        explanation:`Scale factor is ×${mult}. ${s.r1a} × ${mult} = ${answer}. ✅`};
+    },
+    // === SKILL 5: Find the scale factor ===
+    function(){
+      const a=pick([2,3,4,5,6,7,8]);const b=pick([2,3,4,5,6,9,10,11]);
+      const mult=pick([2,3,4,5,6,7]);
+      const answer=mult;
+      const wrongs=shuffle([mult+1,mult-1,mult+2,a,b].filter(w=>w!==answer&&w>0)).slice(0,3);
+      return{teach:`The scale factor is what you multiply BOTH numbers by to get an equivalent ratio. Divide the bigger number by the smaller to find it.`,
+        question:`${a}:${b} is equivalent to ${a*mult}:${b*mult}. What is the scale factor?`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Building Up",
+        hint1:`${a*mult} ÷ ${a} = ?  (that's the scale factor)`,
+        hint2:`${a} × ___ = ${a*mult}`,
+        explanation:`${a} × ${mult} = ${a*mult} and ${b} × ${mult} = ${b*mult}. Scale factor = ${mult}. ✅`};
+    },
+    // === SKILL 6: Equivalent ratios — real world table ===
+    function(){
+      const scenarios=[
+        {ctx:"A roller coaster fits",a:"riders",va:23,b:"minutes",vb:11,target:5,ask:"a"},
+        {ctx:"A diner sells",a:"cups of coffee",va:12,b:"glasses of OJ",vb:10,target:4,ask:"a"},
+        {ctx:"A pack of",a:"notebooks",va:3,b:"costs $",vb:5,target:6,ask:"b"},
+        {ctx:"A plant grows",a:"cm",va:8,b:"days",vb:5,target:5,ask:"a"},
+        {ctx:"A car travels",a:"miles",va:60,b:"hours",vb:1,target:3,ask:"a"},
+        {ctx:"A recipe uses",a:"cups of flour",va:2,b:"cups of sugar",vb:3,target:4,ask:"b"}
+      ];
+      const s=pick(scenarios);
+      const answer=s.ask==="a"?s.va*s.target:s.vb*s.target;
+      const otherVal=s.ask==="a"?s.vb*s.target:s.va*s.target;
+      const wrongs=shuffle([answer+s.va,answer-s.va,answer+s.vb,otherVal].filter(w=>w!==answer&&w>0)).slice(0,3);
+      return{teach:`Set up a ratio table. Find what you multiply by (scale factor) to go from the known value to the target. Then multiply the other value by the same number.`,
+        question:`${s.ctx} ${s.va} ${s.a} every ${s.vb} ${s.b}. How many ${s.ask==="a"?s.a:s.b} for ${otherVal} ${s.ask==="a"?s.b:s.a}?`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Building Up",
+        hint1:`Scale factor: ${s.ask==="a"?otherVal:otherVal} ÷ ${s.ask==="a"?s.vb:s.va} = ${s.target}`,
+        hint2:`Multiply: ${s.ask==="a"?s.va:s.vb} × ${s.target} = ___`,
+        explanation:`Scale factor = ×${s.target}. ${s.ask==="a"?s.va:s.vb} × ${s.target} = ${answer}. ✅`};
+    },
+    // === SKILL 7: Compare ratios using unit rates ===
+    function(){
+      const scenarios=[
+        {ctx:"pages read per minute",people:[{n:"Sam",a:3,b:8},{n:"Lola",a:4,b:9},{n:"Jane",a:5,b:9},{n:"Lilly",a:4,b:20},{n:"Betty",a:3,b:12},{n:"Lenny",a:20,b:52}]},
+        {ctx:"miles per hour",people:[{n:"Alex",a:6,b:2},{n:"Ben",a:10,b:3},{n:"Cara",a:8,b:3},{n:"Dana",a:15,b:4}]},
+        {ctx:"points per game",people:[{n:"Kai",a:24,b:3},{n:"Leo",a:18,b:2},{n:"Mia",a:30,b:4},{n:"Noa",a:15,b:2}]}
+      ];
+      const s=pick(scenarios);
+      const p1=pick(s.people);let p2=pick(s.people.filter(p=>p.n!==p1.n));
+      const r1=(p1.a/p1.b);const r2=(p2.a/p2.b);
+      if(r1===r2){p2=s.people.find(p=>p.n!==p1.n&&(p.a/p.b)!==r1)||p2}
+      const answer=r1>r2?p1.n:p2.n;
+      return{teach:`To compare ratios, find the UNIT RATE (divide the first number by the second). The bigger unit rate wins! ${p1.a}÷${p1.b} = ${(p1.a/p1.b).toFixed(2)} vs ${p2.a}÷${p2.b} = ${(p2.a/p2.b).toFixed(2)}`,
+        question:`Who has a greater ratio of ${s.ctx}? ${p1.n}: ${p1.a} per ${p1.b} or ${p2.n}: ${p2.a} per ${p2.b}?`,
+        answer:answer,type:"choice",choices:[p1.n,p2.n],level:"Challenge",
+        hint1:`Find unit rates: ${p1.a} ÷ ${p1.b} = ? and ${p2.a} ÷ ${p2.b} = ?`,
+        hint2:`${p1.n}: ${(p1.a/p1.b).toFixed(2)} vs ${p2.n}: ${(p2.a/p2.b).toFixed(2)}. Which is bigger?`,
+        explanation:`${p1.n}: ${p1.a}÷${p1.b} = ${(p1.a/p1.b).toFixed(2)}. ${p2.n}: ${p2.a}÷${p2.b} = ${(p2.a/p2.b).toFixed(2)}. ${answer} has the greater rate! ✅`};
+    },
+    // === SKILL 8: Compare ratios — greater than Sam (matching study guide 4B) ===
+    function(){
+      const base={n:"Sam",a:3,b:8};const baseRate=3/8;
+      const people=[
+        {n:"Lola",a:4,b:9},{n:"Jane",a:5,b:9},{n:"Lilly",a:4,b:20},{n:"Betty",a:3,b:12},{n:"Lenny",a:20,b:52}
+      ];
+      const person=pick(people);const rate=person.a/person.b;
+      const isGreater=rate>baseRate;
+      return{teach:`Sam reads ${base.a} pages every ${base.b} minutes. That's a unit rate of ${base.a}÷${base.b} = ${baseRate.toFixed(4)}. Compare others using THEIR unit rates or equivalent ratios.`,
+        question:`Sam reads at a ratio of 3:8 (pages:minutes). Does ${person.n} (${person.a} pages every ${person.b} min) have a GREATER ratio than Sam?`,
+        type:"yesno",correctAnswer:isGreater?"yes":"no",level:"Challenge",
+        hint1:`Find ${person.n}'s unit rate: ${person.a} ÷ ${person.b} = ${(rate).toFixed(4)}`,
+        hint2:`Sam's rate: ${baseRate.toFixed(4)}. ${person.n}'s rate: ${rate.toFixed(4)}. Which is bigger?`,
+        explanation:`${person.n}: ${person.a}÷${person.b} = ${rate.toFixed(3)}. Sam: ${baseRate.toFixed(3)}. ${isGreater?person.n+" IS greater!":person.n+" is NOT greater."} ✅`};
+    },
+    // === SKILL 9: Fill in ratio table (find days given growth — like 5B) ===
+    function(){
+      const scenarios=[
+        {a:"days",va:5,b:"cm grown",vb:8},{a:"hours",va:2,b:"miles",vb:7},
+        {a:"batches",va:1,b:"cookies",vb:24},{a:"weeks",va:1,b:"pages read",vb:45},
+        {a:"gallons",va:3,b:"miles",vb:90}
+      ];
+      const s=pick(scenarios);
+      const mult=pick([2,3,4,5]);
+      const given=s.vb*mult;const answer=s.va*mult;
+      const wrongs=shuffle([answer+s.va,answer-s.va,s.vb*mult,answer+1].filter(w=>w!==answer&&w>0)).slice(0,3);
+      return{teach:`In a ratio table, both values scale by the same factor. If ${s.vb} ${s.b} happens every ${s.va} ${s.a}, find the scale factor from the given value.`,
+        question:`Every ${s.va} ${s.a}, something grows ${s.vb} ${s.b}. If ${s.b} = ${given}, how many ${s.a}?`,
+        visual:`<table style="width:100%;border-collapse:collapse;text-align:center;font-size:15px"><tr style="background:#0C2340;color:white"><td style="padding:8px;border:1px solid #334155">${s.a}</td><td style="padding:8px;border:1px solid #334155">${s.va}</td><td style="padding:8px;border:1px solid #334155;color:#FFCB05;font-weight:bold">?</td></tr><tr style="background:#1e293b;color:white"><td style="padding:8px;border:1px solid #334155">${s.b}</td><td style="padding:8px;border:1px solid #334155">${s.vb}</td><td style="padding:8px;border:1px solid #334155">${given}</td></tr></table>`,
+        answer:String(answer),type:"choice",choices:shuffle([String(answer),...wrongs.map(String)]).slice(0,4),level:"Building Up",
+        hint1:`${given} ÷ ${s.vb} = ? That gives you the scale factor.`,
+        hint2:`Scale factor = ${mult}. Now: ${s.va} × ${mult} = ___`,
+        explanation:`${given} ÷ ${s.vb} = ${mult} (scale factor). ${s.va} × ${mult} = ${answer}. ✅`};
+    },
+    // === SKILL 10: Write ratio as a fraction and simplify ===
+    function(){
+      const gcd=(a,b)=>b===0?a:gcd(b,a%b);
+      const pairs=[[10,15],[4,6],[6,8],[10,5],[12,8],[9,6],[8,12],[6,9],[15,10],[20,12]];
+      const pair=pick(pairs);const a=pair[0],b=pair[1];
+      const g=gcd(a,b);const sa=a/g,sb=b/g;
+      const answer=`${sa}/${sb}`;
+      const wrongs=[`${sb}/${sa}`,`${a}/${b}`,`${g}/${sb}`].filter(w=>w!==answer);
+      return{teach:`A ratio can be written as a fraction. To simplify, divide both numbers by their GCF (greatest common factor). GCF of ${a} and ${b} is ${g}.`,
+        question:`Write the ratio ${a}:${b} as a simplified fraction.`,
+        answer:answer,type:"choice",choices:shuffle([answer,...wrongs]).slice(0,4),level:"Warm-Up",
+        hint1:`Divide both ${a} and ${b} by their GCF.`,
+        hint2:`GCF of ${a} and ${b} is ${g}. So ${a}÷${g} = ${sa} and ${b}÷${g} = ${sb}`,
+        explanation:`${a}:${b} = ${a}/${b} = ${sa}/${sb} (divided both by ${g}). ✅`};
+    },
+    // === SKILL 11: Equivalent ratio — true or false ===
+    function(){
+      const a=rand(2,8),b=rand(2,8);const mult=rand(2,6);
+      const isEquiv=Math.random()<0.5;
+      const c=a*mult,d=isEquiv?b*mult:b*mult+rand(1,3);
+      return{teach:`Two ratios are equivalent if you can multiply (or divide) BOTH parts by the same number to get from one to the other. Check: does ${a}×? = ${c} and ${b}×? = ${d} give the same multiplier?`,
+        question:`Are these ratios equivalent? ${a}:${b} and ${c}:${d}`,
+        type:"yesno",correctAnswer:isEquiv?"yes":"no",level:"Building Up",
+        hint1:`${c} ÷ ${a} = ${c/a}. Now check: ${d} ÷ ${b} = ${(d/b).toFixed(2)}. Same number?`,
+        hint2:isEquiv?`Both give ×${mult}, so they ARE equivalent.`:`${c/a} ≠ ${(d/b).toFixed(2)}, so they are NOT equivalent.`,
+        explanation:isEquiv?`Yes! ${a}×${mult}=${c} and ${b}×${mult}=${d}. Same scale factor (×${mult}). ✅`:`No! ${c}÷${a}=${c/a} but ${d}÷${b}=${(d/b).toFixed(2)}. Different scale factors! ✅`};
+    },
+    // === SKILL 12: Real world — cows to chickens comparison (like Q4 on checkpoint) ===
+    function(){
+      const base={name:"Old McDonald's Farm",a:2,b:7};const baseRate=2/7;
+      const farms=[
+        {name:"Red's Farm",a:3,b:5},{name:"Pasture Farm",a:2,b:9},{name:"Cluck & Moo Farm",a:1,b:5},
+        {name:"C & C Farm",a:3,b:8},{name:"T Family Farm",a:1,b:3},{name:"Green Acres",a:4,b:10}
+      ];
+      const farm=pick(farms);const rate=farm.a/farm.b;
+      const isGreater=rate>baseRate;
+      return{teach:`To compare ratios from different farms, find the unit rate for each. Divide cows by chickens. Bigger number = greater ratio of cows to chickens.`,
+        question:`${base.name} has a cow-to-chicken ratio of ${base.a}:${base.b}. Does ${farm.name} (${farm.a} cows for every ${farm.b} chickens) have a GREATER ratio?`,
+        type:"yesno",correctAnswer:isGreater?"yes":"no",level:"Challenge",
+        hint1:`${base.name}: ${base.a}÷${base.b} = ${baseRate.toFixed(3)}. ${farm.name}: ${farm.a}÷${farm.b} = ${rate.toFixed(3)}`,
+        hint2:`${rate.toFixed(3)} ${isGreater?">":"<"} ${baseRate.toFixed(3)}`,
+        explanation:`${base.name}: ${baseRate.toFixed(3)}. ${farm.name}: ${rate.toFixed(3)}. ${isGreater?"YES, greater!":"NO, not greater."} ✅`};
+    }
+  ];
+  return pick(G)();
+}
+
 const TOPICS=[
+  {id:"retake",name:"Quiz 5 Retake Prep",icon:"🚨",desc:"Ratios — study guide review",gen:genRetakeRatios,retake:true,
+   takeaway:"Remember: Ratios compare two quantities. Part-to-part = group vs group. Part-to-whole = group vs total. Equivalent ratios use the SAME scale factor. Unit rates help you compare!"},
   {id:"ratios",name:"Equivalent Ratios",icon:"⚖️",desc:"Scale factors & proportions",gen:genRatio,
    takeaway:"Equivalent ratios keep the same relationship — multiply or divide BOTH sides by the same number!"},
   {id:"fractions",name:"Fractions",icon:"🍕",desc:"Add, subtract, multiply, divide",gen:genFraction,
@@ -1916,7 +2134,7 @@ function render(){
         <div style="text-align:center"><button class="btn-back" onclick="goLanding()">← Switch Player</button></div>
       </div></div>`;
     } else {
-      const topicBtns=topics.map(t=>`<div class="topic-btn" onclick="startTopic('${t.id}')"><span class="icon">${t.icon}</span><div class="name">${t.name}</div><div class="desc">${t.desc}</div></div>`).join("");
+      const topicBtns=topics.map(t=>`<div class="topic-btn${t.retake?' retake':''}" onclick="startTopic('${t.id}')"><span class="icon">${t.icon}</span><div class="name">${t.name}</div><div class="desc">${t.desc}</div></div>`).join("");
       app.innerHTML=`<div class="card">
         <div class="hero">
           <div class="tagline">6th Grade Math</div>
