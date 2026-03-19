@@ -1586,9 +1586,12 @@ function genAlphabet(){
 
 // ======== SIGHT WORDS ========
 function genSightWords(){
-  const hero=pick(HEROES);const emoji=HERO_EMOJI[hero];
   const allWords=[...SIGHT_WORDS,...Object.keys(WORD_IMAGES)];
-  const word=pick(allWords);
+  if(!genSightWords._queue||genSightWords._queue.length===0){
+    genSightWords._queue=shuffle([...allWords]);
+  }
+  const word=genSightWords._queue.shift();
+  const hero=pick(HEROES);const emoji=HERO_EMOJI[hero];
   return{teach:`${hero} says: Look at the word carefully! Say it out loud, then write it!`,
     question:`Write this sight word:`,
     word:word,
@@ -2019,7 +2022,7 @@ const MAV_SUBJECTS=[
      takeaway:"Every letter has a name, a sound, and a shape. Keep practicing and you'll know them all!"},
     {id:"lettersounds",name:"Letter Sounds",icon:"🔊",desc:"Learn the sounds letters make",gen:genLetterSounds,
      takeaway:"Every letter makes a special sound. When you know the sounds, you can read ANY word!"},
-    {id:"sightwords",name:"Sight Words",icon:"📖",desc:"Match words to pictures",gen:genSightWords,
+    {id:"sightwords",name:"Sight Words",icon:"📖",desc:"Write all your sight words",gen:genSightWords,numQ:SIGHT_WORDS.length+PIC_WORDS.length,
      takeaway:"Sight words are words you see all the time. The more you practice, the faster you'll read!"},
     {id:"comprehension",name:"Story Time",icon:"📚",desc:"Read & answer questions",gen:genComprehension,
      takeaway:"Good readers think about what they read. Read carefully and you'll find all the answers!"}
@@ -2359,19 +2362,11 @@ function render(){
 
   // === WRITE-WORD TYPE (sight words: type or draw) ===
   if(q.type==="write-word"){
-    if(!q._mode)q._mode="type";
+    if(!q._mode)q._mode="draw";
     const wordDone=S.feedback&&(S.feedback.type==="correct"||S.feedback.type==="showAnswer");
-    const modeToggle=wordDone?"":
-      `<div class="mode-toggle">
-        <button class="mode-btn${q._mode==="type"?" active":""}" onclick="setWordMode('type')">⌨️ Type it</button>
-        <button class="mode-btn${q._mode==="draw"?" active":""}" onclick="setWordMode('draw')">✏️ Write it</button>
-      </div>`;
     let wordInput="";
     if(!wordDone){
-      if(q._mode==="type"){
-        wordInput=`<input id="word-input" class="word-type-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="type here…" value="${S.input||""}">
-          <button class="btn-check" style="width:100%;font-size:18px;padding:14px" onclick="checkWordType()">CHECK ✓</button>`;
-      } else if(q._showCheck&&q._drawing){
+      if(q._showCheck&&q._drawing){
         wordInput=`<div class="self-check-box">
           <p>Does your writing look like <strong>${q.word}</strong>?</p>
           <img src="${q._drawing}" class="drawn-preview" alt="your writing">
@@ -2407,7 +2402,7 @@ function render(){
       <div style="text-align:center"><p style="font-size:15px;color:#64748b;margin-bottom:4px">Your word is:</p>
         <div class="word-flash">${q.word}</div>
       </div>
-      ${modeToggle}${wordInput}${wfb}${wnx}
+      ${wordInput}${wfb}${wnx}
       <div style="text-align:center"><button class="btn-back" onclick="goHome()">← Back to missions</button></div>
     </div></div>`;
     // Set up canvas if in draw mode
@@ -2434,8 +2429,6 @@ function render(){
         canvas.addEventListener("touchstart",start,{passive:false});canvas.addEventListener("touchmove",move,{passive:false});canvas.addEventListener("touchend",stop,{passive:false});
       }
     }
-    // Focus type input
-    if(!wordDone&&q._mode==="type"){const el=document.getElementById("word-input");if(el){el.focus();el.addEventListener("keydown",e=>{if(e.key==="Enter")checkWordType();});}}
     return;
   }
 
@@ -2469,6 +2462,7 @@ function goHome(){S.screen="home";S.subject=null;S.topic=null;S.questions=[];S.q
 
 function startTopic(id){
   genCounting._call=0;// reset ordering cycle
+  genSightWords._queue=null;// reset sight word queue so it reshuffles each session
   S={screen:"quiz",player:S.player,subject:S.subject,topic:id,questions:generateQuiz(id),qIndex:0,input:"",hintsUsed:0,feedback:null,score:0,attempts:0,results:[]};
   render();
 }
@@ -2490,7 +2484,8 @@ function clearCanvas(){
   // Redraw guide line
   ctx.setLineDash([6,4]);ctx.strokeStyle="#e2e8f0";ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(0,120);ctx.lineTo(canvas.width,120);ctx.stroke();
-  ctx.setLineDash([]);
+  // Reset to drawing style so next strokes are dark
+  ctx.setLineDash([]);ctx.strokeStyle="#1A1A2E";ctx.lineWidth=5;
 }
 
 function finishWriting(){
