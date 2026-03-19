@@ -109,6 +109,23 @@
   .pic-choice-btn:hover{border-color:#0076B6;background:#f0f9ff;transform:scale(1.03)}
   .pic-choice-btn svg{max-width:100%;height:auto}
   .sight-word-display{font-family:'Fredoka',sans-serif;font-size:72px;font-weight:700;text-align:center;color:#1A1A2E;letter-spacing:3px;padding:16px}
+  .word-flash{font-family:'Fredoka',sans-serif;font-size:80px;font-weight:700;text-align:center;color:#1A1A2E;letter-spacing:4px;padding:16px 0 8px;line-height:1}
+  .mode-toggle{display:flex;gap:0;margin:12px 0;border-radius:10px;overflow:hidden;border:2px solid #E23636}
+  .mode-btn{flex:1;padding:10px;font-family:'Fredoka',sans-serif;font-size:16px;font-weight:700;cursor:pointer;border:none;background:#fff;color:#E23636;transition:all .15s}
+  .mode-btn.active{background:#E23636;color:white}
+  .word-type-input{width:100%;padding:14px;font-size:36px;font-family:'Fredoka',sans-serif;font-weight:700;text-align:center;border:3px solid #E23636;border-radius:12px;outline:none;color:#1A1A2E;letter-spacing:3px;box-sizing:border-box;margin-bottom:10px}
+  .word-type-input:focus{border-color:#1A1A2E;box-shadow:0 0 0 3px rgba(226,54,54,0.2)}
+  .write-canvas-wrap{position:relative;margin-bottom:10px}
+  #write-canvas{width:100%;height:180px;border:3px solid #E23636;border-radius:12px;background:#fffbf0;touch-action:none;display:block;cursor:crosshair}
+  .canvas-btns{display:flex;gap:8px;margin-bottom:10px}
+  .btn-clear-canvas{flex:1;padding:10px;font-family:'Fredoka',sans-serif;font-size:15px;font-weight:700;border-radius:10px;cursor:pointer;background:#f1f5f9;border:2px solid #cbd5e1;color:#475569}
+  .btn-done-write{flex:2;padding:10px;font-family:'Fredoka',sans-serif;font-size:16px;font-weight:700;border-radius:10px;cursor:pointer;background:#E23636;border:none;color:white}
+  .self-check-box{background:#fff7ed;border:2px solid #fed7aa;border-radius:12px;padding:14px;text-align:center;margin-bottom:10px}
+  .self-check-box p{font-family:'Fredoka',sans-serif;font-size:18px;color:#1A1A2E;margin-bottom:10px}
+  .self-check-btns{display:flex;gap:10px}
+  .btn-yes-wrote{flex:1;padding:12px;font-size:20px;font-family:'Fredoka',sans-serif;font-weight:700;border-radius:10px;cursor:pointer;background:#f0fdf4;border:2px solid #4ade80;color:#166534}
+  .btn-no-wrote{flex:1;padding:12px;font-size:20px;font-family:'Fredoka',sans-serif;font-weight:700;border-radius:10px;cursor:pointer;background:#fef2f2;border:2px solid #f87171;color:#991b1b}
+  .drawn-preview{border:2px solid #e2e8f0;border-radius:10px;margin-bottom:8px;width:100%;display:block}
   .subject-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
   .subject-btn{background:linear-gradient(135deg,#f8fafc,#e2e8f0);border:3px solid #cbd5e1;border-radius:16px;padding:24px 16px;cursor:pointer;text-align:center;transition:all .2s;font-family:'Fredoka',sans-serif}
   .subject-btn:hover{border-color:#0076B6;transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,0.1)}
@@ -1431,7 +1448,7 @@ const HERO_EMOJI={"Iron Man":"🦸","Spider-Man":"🕷️","Captain America":"�
 const MAV_THINGS=["monster trucks","Legos","guitars","baseballs","llamas","action figures","stickers","crayons","toy cars","cookies"];
 const MAV_CONFETTI=["#E23636","#FFD700","#0066CC","#ff4444","#1A1A2E","#4ade80"];
 
-const SIGHT_WORDS=["here","you","come","go","is","me","my","see","the","to","up","we","and","do","got","had","he","she","black","can","did","him","of","green","orange","has","on","in","his","look","like","it","have","be","at","am","for","get","play"];
+const SIGHT_WORDS=["here","you","come","go","is","me","my","see","the","to","up","we","and","do","got","had","he","she","black","can","did","him","of","green","orange","has","on","in","his","look","like","it","have","be","at","am","for","get","play","blue","brown","pink","purple","red","said","white","will","yellow"];
 const COLOR_WORDS={"green":"#22c55e","orange":"#f97316","black":"#1e293b"};
 // Concrete picture words with clear SVG illustrations — no room for misinterpretation
 const PIC_WORDS=["cat","dog","sun","hat","fish","cup","bed","car","tree","ball","star","book","egg","pig","bus","frog","cake","moon","boat","hand"];
@@ -1570,15 +1587,13 @@ function genAlphabet(){
 // ======== SIGHT WORDS ========
 function genSightWords(){
   const hero=pick(HEROES);const emoji=HERO_EMOJI[hero];
-  const picWords=Object.keys(WORD_IMAGES);
-  const word=pick(picWords);
-  const wrongs=shuffle(picWords.filter(w=>w!==word)).slice(0,3);
-  return{teach:`${hero} says: Read the word, then find the matching picture!`,
-    question:`Find the picture that matches this word:`,
-    visual:`<div class="sight-word-display">${word}</div>`,
-    answer:word,type:"pic-choice",choices:shuffle([word,...wrongs]),level:"Warm-Up",
-    hint1:`Think about what a ${word} looks like!`,
-    explanation:`Yes! That's a ${word}! ${emoji} Great reading! ⭐`};
+  const allWords=[...SIGHT_WORDS,...Object.keys(WORD_IMAGES)];
+  const word=pick(allWords);
+  return{teach:`${hero} says: Look at the word carefully! Say it out loud, then write it!`,
+    question:`Write this sight word:`,
+    word:word,
+    answer:word,type:"write-word",level:"Warm-Up",
+    explanation:`"${word}"! ${emoji} Amazing writing! ⭐`};
 }
 
 // ======== KINDERGARTEN MATH ========
@@ -2342,6 +2357,88 @@ function render(){
     return;
   }
 
+  // === WRITE-WORD TYPE (sight words: type or draw) ===
+  if(q.type==="write-word"){
+    if(!q._mode)q._mode="type";
+    const wordDone=S.feedback&&(S.feedback.type==="correct"||S.feedback.type==="showAnswer");
+    const modeToggle=wordDone?"":
+      `<div class="mode-toggle">
+        <button class="mode-btn${q._mode==="type"?" active":""}" onclick="setWordMode('type')">⌨️ Type it</button>
+        <button class="mode-btn${q._mode==="draw"?" active":""}" onclick="setWordMode('draw')">✏️ Write it</button>
+      </div>`;
+    let wordInput="";
+    if(!wordDone){
+      if(q._mode==="type"){
+        wordInput=`<input id="word-input" class="word-type-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="type here…" value="${S.input||""}">
+          <button class="btn-check" style="width:100%;font-size:18px;padding:14px" onclick="checkWordType()">CHECK ✓</button>`;
+      } else if(q._showCheck&&q._drawing){
+        wordInput=`<div class="self-check-box">
+          <p>Does your writing look like <strong>${q.word}</strong>?</p>
+          <img src="${q._drawing}" class="drawn-preview" alt="your writing">
+          <div class="self-check-btns">
+            <button class="btn-yes-wrote" onclick="checkWrite(true)">✅ Yes!</button>
+            <button class="btn-no-wrote" onclick="checkWrite(false)">❌ Try again</button>
+          </div>
+        </div>`;
+      } else {
+        wordInput=`<div class="write-canvas-wrap"><canvas id="write-canvas" width="600" height="180"></canvas></div>
+          <div class="canvas-btns">
+            <button class="btn-clear-canvas" onclick="clearCanvas()">🗑 Clear</button>
+            <button class="btn-done-write" onclick="finishWriting()">Done ✓</button>
+          </div>`;
+      }
+    }
+    let wfb="";
+    if(S.feedback){
+      const f=S.feedback;
+      const pfx=f.type==="correct"?"🌟 SUPER! ":f.type==="showAnswer"?"📝 The word is: ":"";
+      wfb=`<div class="feedback ${f.type}"><p>${pfx}${f.msg}</p></div>`;
+    }
+    const wnx=wordDone?`<button class="btn-next" onclick="next()">${S.qIndex+1<numQ?"NEXT! →":"SEE RESULTS! 🌟"}</button>`:"";
+    app.innerHTML=`<div class="mav"><div class="card">
+      <div class="header-bar">
+        <div class="logo">${topic.icon}</div>
+        <div class="title-area"><h2 style="font-family:'Fredoka',sans-serif">${topic.name}</h2><div class="subtitle">Q${S.qIndex+1} of ${numQ}</div></div>
+        <div class="score-badge">${S.score} ⭐</div>
+      </div>
+      <div class="streak-bar">${streakDots()}</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${(S.qIndex/numQ)*100}%"></div></div>
+      <div class="teach-box"><p>🦸 <strong>Hero Tip:</strong> ${q.teach}</p></div>
+      <div style="text-align:center"><p style="font-size:15px;color:#64748b;margin-bottom:4px">Your word is:</p>
+        <div class="word-flash">${q.word}</div>
+      </div>
+      ${modeToggle}${wordInput}${wfb}${wnx}
+      <div style="text-align:center"><button class="btn-back" onclick="goHome()">← Back to missions</button></div>
+    </div></div>`;
+    // Set up canvas if in draw mode
+    if(!wordDone&&q._mode==="draw"&&!q._showCheck){
+      const canvas=document.getElementById("write-canvas");
+      if(canvas){
+        const ctx=canvas.getContext("2d");
+        ctx.strokeStyle="#1A1A2E";ctx.lineWidth=5;ctx.lineCap="round";ctx.lineJoin="round";
+        // Draw guide line
+        ctx.setLineDash([6,4]);ctx.strokeStyle="#e2e8f0";ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(0,120);ctx.lineTo(canvas.width,120);ctx.stroke();
+        ctx.setLineDash([]);ctx.strokeStyle="#1A1A2E";ctx.lineWidth=5;
+        let drawing=false;
+        const pos=(e)=>{
+          const r=canvas.getBoundingClientRect();
+          const scaleX=canvas.width/r.width;const scaleY=canvas.height/r.height;
+          const src=e.touches?e.touches[0]:e;
+          return{x:(src.clientX-r.left)*scaleX,y:(src.clientY-r.top)*scaleY};
+        };
+        const start=(e)=>{e.preventDefault();drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
+        const move=(e)=>{e.preventDefault();if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
+        const stop=(e)=>{e.preventDefault();drawing=false;};
+        canvas.addEventListener("mousedown",start);canvas.addEventListener("mousemove",move);canvas.addEventListener("mouseup",stop);
+        canvas.addEventListener("touchstart",start,{passive:false});canvas.addEventListener("touchmove",move,{passive:false});canvas.addEventListener("touchend",stop,{passive:false});
+      }
+    }
+    // Focus type input
+    if(!wordDone&&q._mode==="type"){const el=document.getElementById("word-input");if(el){el.focus();el.addEventListener("keydown",e=>{if(e.key==="Enter")checkWordType();});}}
+    return;
+  }
+
   app.innerHTML=`${wrapper}<div class="card">
     <div class="header-bar">
       <div class="logo">${topic.icon}</div>
@@ -2373,6 +2470,71 @@ function goHome(){S.screen="home";S.subject=null;S.topic=null;S.questions=[];S.q
 function startTopic(id){
   genCounting._call=0;// reset ordering cycle
   S={screen:"quiz",player:S.player,subject:S.subject,topic:id,questions:generateQuiz(id),qIndex:0,input:"",hintsUsed:0,feedback:null,score:0,attempts:0,results:[]};
+  render();
+}
+
+// ====== WRITE-WORD HELPERS ======
+function setWordMode(mode){
+  S.questions[S.qIndex]._mode=mode;
+  S.questions[S.qIndex]._showCheck=false;
+  S.questions[S.qIndex]._drawing=null;
+  S.feedback=null;S.input="";
+  render();
+}
+
+function clearCanvas(){
+  const canvas=document.getElementById("write-canvas");
+  if(!canvas)return;
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // Redraw guide line
+  ctx.setLineDash([6,4]);ctx.strokeStyle="#e2e8f0";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,120);ctx.lineTo(canvas.width,120);ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function finishWriting(){
+  const q=S.questions[S.qIndex];
+  const canvas=document.getElementById("write-canvas");
+  if(!canvas)return;
+  q._drawing=canvas.toDataURL();
+  q._showCheck=true;
+  render();
+}
+
+function checkWordType(){
+  const q=S.questions[S.qIndex];
+  const el=document.getElementById("word-input");
+  if(!el)return;
+  const uv=el.value.trim().toLowerCase();
+  if(!uv)return;
+  const ok=uv===q.answer.toLowerCase();
+  if(ok){
+    S.score++;confetti(getConfettiColors());
+    S.feedback={type:"correct",msg:q.explanation};
+    S.results.push({correct:true,hintsUsed:0,attempts:S.attempts+1,userAnswer:uv});
+  }else{
+    S.attempts++;
+    if(S.attempts>=getMaxAttempts()){
+      S.feedback={type:"showAnswer",msg:`The word is "${q.word}"! Keep practicing! ⭐`};
+      S.results.push({correct:false,hintsUsed:0,attempts:S.attempts,userAnswer:uv});
+    }else{
+      S.feedback={type:"tryAgain",msg:`Almost! Sound it out — "${q.word}" — try again! 💪`};
+    }
+  }
+  render();
+}
+
+function checkWrite(wasCorrect){
+  const q=S.questions[S.qIndex];
+  if(wasCorrect){
+    S.score++;confetti(getConfettiColors());
+    S.feedback={type:"correct",msg:q.explanation};
+    S.results.push({correct:true,hintsUsed:0,attempts:1,userAnswer:q.word});
+  }else{
+    q._showCheck=false;q._drawing=null;
+    S.feedback={type:"tryAgain",msg:`No worries! Clear it and try writing "${q.word}" again! ✏️`};
+  }
   render();
 }
 
