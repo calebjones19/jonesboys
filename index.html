@@ -143,6 +143,15 @@
   .num-tile.correct-tap{background:#22C55E;color:white;border-color:#16A34A;pointer-events:none;opacity:0.5;transform:scale(0.9)}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
   .order-prompt{font-family:'Fredoka',sans-serif;font-size:20px;color:#1A1A2E;text-align:center;margin-bottom:12px;font-weight:700}
+  .sort-prompt{font-family:'Fredoka',sans-serif;font-size:16px;color:#64748b;text-align:center;margin-bottom:10px}
+  .sort-area{display:flex;flex-wrap:wrap;gap:10px;padding:16px;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:14px;justify-content:center;min-height:64px;align-items:center;transition:border-color .2s}
+  .sort-area.drag-active{border-color:#0076B6;background:#f0f9ff}
+  .sort-tile{padding:10px 18px;border-radius:10px;cursor:grab;font-family:'Russo One',sans-serif;font-weight:700;font-size:22px;background:#1A1A2E;color:#FFD700;border:3px solid transparent;transition:transform .15s,opacity .15s,background .2s;user-select:none;min-width:52px;text-align:center}
+  .sort-tile:active{cursor:grabbing}
+  .sort-tile.dragging{opacity:0.35;transform:scale(1.12)}
+  .sort-tile.drag-over{border-color:#0076B6;transform:scale(1.1);background:#0076B6;color:white}
+  .sort-tile.median-hl{background:#FFD700;color:#1A1A2E;border-color:#E23636;box-shadow:0 0 0 3px #E23636;animation:popIn .35s ease-out}
+  .sort-tile.sorted-ok{background:#16a34a;color:white;border-color:#15803d}
   .topic-btn.retake{grid-column:1/-1;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:3px solid #ef4444;animation:retakePulse 2s ease-in-out infinite;position:relative;overflow:hidden}
   .topic-btn.retake::before{content:'⚡ RETAKE PREP ⚡';position:absolute;top:0;left:0;right:0;background:#ef4444;color:white;font-size:10px;font-weight:800;letter-spacing:2px;padding:3px 0;text-transform:uppercase}
   .topic-btn.retake .icon{margin-top:14px}
@@ -1075,16 +1084,17 @@ function genStats(){
         hint2:`Sum = ${sum}. Divide by ${n}: ___`,
         explanation:`Mean = ${sum} ÷ ${n} = ${mean}! 📊`};
     },
-    // 2. Median of odd count
+    // 2. Median of odd count (drag to sort)
     function(){
       const vals=Array.from({length:5},()=>rand(2,25)).sort((a,b)=>a-b);
       const shuffled=shuffle([...vals]);
       return{teach:"Median = middle number when values are in ORDER!",
-        question:`Find the median: ${shuffled.join(", ")}`,
-        answer:vals[2],type:"number",level:"Warm-Up",
-        hint1:"First, put them in order from least to greatest.",
-        hint2:`Ordered: ${vals.join(", ")}. The middle (3rd) one is ___`,
-        explanation:`Ordered: ${vals.join(", ")}. Median = ${vals[2]}! ✅`};
+        question:`Drag the numbers into order from least to greatest, then find the median.`,
+        answer:vals[2],type:"sort-order",level:"Warm-Up",
+        tiles:shuffled,sorted:vals,medianIdx:[2],
+        hint1:"Drag smallest to biggest, left to right.",
+        hint2:`Ordered: ${vals.join(", ")}. The middle (3rd) value is the median.`,
+        explanation:`Ordered: ${vals.join(", ")}. The middle number is the median = ${vals[2]}! ✅`};
     },
     // 3. Range
     function(){
@@ -1110,17 +1120,18 @@ function genStats(){
         hint2:`Which number shows up 3 times?`,
         explanation:`${mode} appears 3 times — it's the mode! ✅`};
     },
-    // 5. Median of even count
+    // 5. Median of even count (drag to sort)
     function(){
       const vals=Array.from({length:6},()=>rand(2,20)).sort((a,b)=>a-b);
       const med=(vals[2]+vals[3])/2;
       const shuffled=shuffle([...vals]);
       return{teach:"For an even count: median = average of the two middle numbers!",
-        question:`Find the median: ${shuffled.join(", ")}. (May be a decimal)`,
-        answer:med,type:"number",level:"Challenge",
-        hint1:`Put in order first. With 6 numbers, average the 3rd and 4th.`,
-        hint2:`Ordered: ${vals.join(", ")}. Middle two: ${vals[2]} and ${vals[3]}. Average: ___`,
-        explanation:`(${vals[2]} + ${vals[3]}) ÷ 2 = ${med}. Median of even count! 🔥`};
+        question:`Drag the numbers into order. With 6 numbers, average the 3rd and 4th for the median.`,
+        answer:med,type:"sort-order",level:"Challenge",
+        tiles:shuffled,sorted:vals,medianIdx:[2,3],
+        hint1:`Drag smallest to biggest. With 6 numbers, the middle two are positions 3 and 4.`,
+        hint2:`Ordered: ${vals.join(", ")}. Middle two: ${vals[2]} and ${vals[3]}. (${vals[2]} + ${vals[3]}) ÷ 2 = ___`,
+        explanation:`Ordered: ${vals.join(", ")}. Middle two are ${vals[2]} and ${vals[3]}. Median = (${vals[2]} + ${vals[3]}) ÷ 2 = ${med}! 🔥`};
     },
     // 6. Mean of 4
     function(){
@@ -1175,16 +1186,17 @@ function genStats(){
         hint2:`New range: ${vals[vals.length-1]} - ${newVal} = ___`,
         explanation:`New range = ${vals[vals.length-1]} - ${newVal} = ${newRange}! Adding changed the minimum. ✅`};
     },
-    // 10. Median of 7 numbers
+    // 10. Median of 7 numbers (drag to sort)
     function(){
       const vals=Array.from({length:7},()=>rand(1,30)).sort((a,b)=>a-b);
       const shuffled=shuffle([...vals]);
       return{teach:"For 7 numbers in order, the median is the 4th one (middle of 7)!",
-        question:`Find the median: ${shuffled.join(", ")}`,
-        answer:vals[3],type:"number",level:"Building Up",
-        hint1:"Put them in order first. The 4th number is the middle.",
-        hint2:`Ordered: ${vals.join(", ")}. Position 4 is ___`,
-        explanation:`Ordered: ${vals.join(", ")}. Median (4th of 7) = ${vals[3]}! ✅`};
+        question:`Drag the numbers into order. The median of 7 numbers is the one in the middle (position 4).`,
+        answer:vals[3],type:"sort-order",level:"Building Up",
+        tiles:shuffled,sorted:vals,medianIdx:[3],
+        hint1:"Drag smallest to biggest. With 7 numbers, the 4th is the middle.",
+        hint2:`Ordered: ${vals.join(", ")}. The 4th number is ___`,
+        explanation:`Ordered: ${vals.join(", ")}. The 4th number (middle of 7) is the median = ${vals[3]}! ✅`};
     },
     // 11. Two modes
     function(){
@@ -2360,6 +2372,81 @@ function render(){
     return;
   }
 
+  // === SORT-ORDER TYPE (drag numbers into order for median) ===
+  if(q.type==="sort-order"){
+    if(!q._order)q._order=[...q.tiles];
+    const isSorted=q._sortCorrect;
+    const tilesHTML=q._order.map((v,i)=>{
+      let cls="sort-tile";
+      if(isSorted){cls+=q.medianIdx&&q.medianIdx.includes(i)?" median-hl":" sorted-ok";}
+      return `<div class="${cls}"${!isSorted?` draggable="true" data-idx="${i}"`:""}>${v}</div>`;
+    }).join("");
+    let sortFb="";
+    if(S.feedback){
+      const f=S.feedback;
+      const pfx=f.type==="correct"?"🎉 TOUCHDOWN! ":f.type==="hint"?"💡 Coach says: ":f.type==="tryAgain"?"🔄 Keep going: ":"";
+      sortFb=`<div class="feedback ${f.type}"><p>${pfx}${f.msg}</p></div>`;
+    }
+    const sortBtn=!isSorted?`<button class="btn-check" style="width:100%;margin-top:14px" onclick="checkSortOrder()">Check Order ✓</button>`:"";
+    const nxBtn=isSorted?`<button class="btn-next" onclick="next()">${S.qIndex+1<numQ?"NEXT PLAY →":"SEE FINAL SCORE 🏆"}</button>`:"";
+    const hintBtn=!isSorted&&maxHints>S.hintsUsed?`<button class="hint-btn" onclick="getHint()">💡 ${S.hintsUsed===0?"Get a hint":"One more hint"} (${maxHints-S.hintsUsed} left)</button>`:"";
+    app.innerHTML=`<div><div class="card">
+      <div class="header-bar">
+        <div class="logo">${topic.icon}</div>
+        <div class="title-area"><h2 style="font-family:'Russo One',sans-serif">${topic.name}</h2><div class="subtitle">Q${S.qIndex+1} of ${numQ}</div></div>
+        <div class="score-badge">${S.score} pts</div>
+      </div>
+      <div class="streak-bar">${streakDots()}</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${(S.qIndex/numQ)*100}%"></div></div>
+      <span class="level-badge" style="background:${lc};color:${ltc}">${q.level}</span>
+      <div class="teach-box"><p>📖 <strong>Learn:</strong> ${q.teach}</p></div>
+      <div class="question-box"><p>${q.question}</p></div>
+      <div class="sort-prompt">${isSorted?"✅ Sorted! The highlighted number(s) show the median:":"Drag the tiles to put them in order ↓"}</div>
+      <div class="sort-area" id="sort-area">${tilesHTML}</div>
+      ${!isSorted?sortBtn:""}
+      ${hintBtn}${sortFb}${nxBtn}
+      <div style="text-align:center"><button class="btn-back" onclick="goHome()">← Back to topics</button></div>
+    </div></div>`;
+    // Init drag-and-drop
+    if(!isSorted){
+      let _dragSrc=null;
+      const area=document.getElementById("sort-area");
+      if(area){
+        const tiles=area.querySelectorAll(".sort-tile");
+        tiles.forEach((tile,i)=>{
+          tile.addEventListener("dragstart",e=>{
+            _dragSrc=i;tile.classList.add("dragging");
+            area.classList.add("drag-active");
+            e.dataTransfer.effectAllowed="move";
+          });
+          tile.addEventListener("dragend",()=>{
+            tile.classList.remove("dragging");area.classList.remove("drag-active");
+            area.querySelectorAll(".sort-tile").forEach(t=>t.classList.remove("drag-over"));
+          });
+          tile.addEventListener("dragover",e=>{
+            e.preventDefault();e.dataTransfer.dropEffect="move";
+            if(_dragSrc!==null&&_dragSrc!==i){
+              area.querySelectorAll(".sort-tile").forEach(t=>t.classList.remove("drag-over"));
+              tile.classList.add("drag-over");
+            }
+          });
+          tile.addEventListener("dragleave",()=>tile.classList.remove("drag-over"));
+          tile.addEventListener("drop",e=>{
+            e.preventDefault();
+            if(_dragSrc===null||_dragSrc===i)return;
+            const arr=[...q._order];
+            [arr[_dragSrc],arr[i]]=[arr[i],arr[_dragSrc]];
+            q._order=arr;
+            if(S.feedback&&S.feedback.type!=="hint")S.feedback=null;
+            _dragSrc=null;
+            render();
+          });
+        });
+      }
+    }
+    return;
+  }
+
   // === WRITE-WORD TYPE (sight words: type or draw) ===
   if(q.type==="write-word"){
     if(!q._mode)q._mode="draw";
@@ -2545,6 +2632,13 @@ function check(v){
   if(q.type==="yesno"){ok=uv.toLowerCase()===q.correctAnswer}
   else if(q.type==="choice"||q.type==="pic-choice"){ok=uv===String(q.answer)}
   else{ok=Math.abs(Number(uv)-q.answer)<0.01}
+  // Max: no live feedback — record result silently and auto-advance
+  if(!isMav){
+    if(ok){S.score++;confetti(getConfettiColors());S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:1,userAnswer:uv});}
+    else{S.results.push({correct:false,hintsUsed:S.hintsUsed,attempts:1,userAnswer:uv});}
+    setTimeout(next,400);
+    return;
+  }
   if(ok){
     S.score++;confetti(getConfettiColors());
     S.feedback={type:"correct",msg:q.explanation};
@@ -2555,14 +2649,25 @@ function check(v){
       S.feedback={type:"showAnswer",msg:q.explanation};
       S.results.push({correct:false,hintsUsed:S.hintsUsed,attempts:S.attempts,userAnswer:uv});
     } else {
-      if(isMav){
-        S.feedback={type:"tryAgain",msg:S.attempts===1?"Almost! Try again — grab a hint! 💡":"One more try! You can do it, hero! 💪"};
-      } else {
-        S.feedback={type:"tryAgain",msg:S.attempts===1?"Incomplete pass! Try again.":"Almost had it! One more shot."};
-      }
+      S.feedback={type:"tryAgain",msg:S.attempts===1?"Almost! Try again — grab a hint! 💡":"One more try! You can do it, hero! 💪"};
     }
   }
   render();
+}
+
+function checkSortOrder(){
+  const q=S.questions[S.qIndex];
+  const correct=q._order.join(",")===q.sorted.join(",");
+  if(correct){
+    S.score++;confetti(getConfettiColors());
+    S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:S.attempts+1,userAnswer:q._order.join(", ")});
+    // Auto-advance without showing answer (Max-only feature — sort-order is always Max)
+    setTimeout(next,500);
+  }else{
+    S.attempts++;
+    S.feedback={type:"tryAgain",msg:`Not in order yet — keep rearranging!`};
+    render();
+  }
 }
 
 function getHint(){
