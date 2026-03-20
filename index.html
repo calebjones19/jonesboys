@@ -2380,7 +2380,7 @@ function render(){
     const orderDone=q._orderDone; // order confirmed correct, now enter median
     const tilesHTML=q._order.map((v,i)=>{
       let cls="sort-tile";
-      if(orderDone){cls+=q.medianIdx&&q.medianIdx.includes(i)?" median-hl":" sorted-ok";}
+      if(orderDone){cls+=" sorted-ok";}
       return `<div class="${cls}"${!orderDone?` draggable="true" data-idx="${i}"`:""}>${v}</div>`;
     }).join("");
     let sortFb="";
@@ -2639,7 +2639,7 @@ function check(v){
   else{ok=Math.abs(Number(uv)-q.answer)<0.01}
   // Max: no live feedback — record result silently and auto-advance
   if(!isMav){
-    if(ok){S.score++;confetti(getConfettiColors());S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:1,userAnswer:uv});}
+    if(ok){S.score++;S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:1,userAnswer:uv});}
     else{S.results.push({correct:false,hintsUsed:S.hintsUsed,attempts:1,userAnswer:uv});}
     setTimeout(next,400);
     return;
@@ -2680,7 +2680,7 @@ function checkMedianAnswer(){
   const uv=el.value.trim();
   if(!uv)return;
   const ok=Math.abs(Number(uv)-q.answer)<0.01;
-  if(ok){S.score++;confetti(getConfettiColors());S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:S.attempts+1,userAnswer:uv});}
+  if(ok){S.score++;S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:S.attempts+1,userAnswer:uv});}
   else{S.results.push({correct:false,hintsUsed:S.hintsUsed,attempts:S.attempts+1,userAnswer:uv});}
   setTimeout(next,400);
 }
