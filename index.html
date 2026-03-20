@@ -2396,7 +2396,7 @@ function render(){
       <div class="header-bar">
         <div class="logo">${topic.icon}</div>
         <div class="title-area"><h2 style="font-family:'Russo One',sans-serif">${topic.name}</h2><div class="subtitle">Q${S.qIndex+1} of ${numQ}</div></div>
-        <div class="score-badge">${S.score} pts</div>
+        <div class="score-badge">— pts</div>
       </div>
       <div class="streak-bar">${streakDots()}</div>
       <div class="progress-track"><div class="progress-fill" style="width:${(S.qIndex/numQ)*100}%"></div></div>
@@ -2528,7 +2528,7 @@ function render(){
     <div class="header-bar">
       <div class="logo">${topic.icon}</div>
       <div class="title-area"><h2 style="font-family:'${headerFont}',sans-serif">${topic.name}</h2><div class="subtitle">Q${S.qIndex+1} of ${numQ}</div></div>
-      <div class="score-badge">${S.score} ${isMav?"⭐":"pts"}</div>
+      <div class="score-badge">${isMav?S.score+" ⭐":"— pts"}</div>
     </div>
     <div class="streak-bar">${streakDots()}</div>
     <div class="progress-track"><div class="progress-fill" style="width:${(S.qIndex/numQ)*100}%"></div></div>
