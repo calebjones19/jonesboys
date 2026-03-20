@@ -2114,8 +2114,10 @@ function generateQuiz(topicId){
 
 function streakDots(){
   const numQ=getNumQ();
+  const isMax=S.player==="max";
   return S.questions.map((_,i)=>{
-    if(i<S.results.length){const r=S.results[i];return`<div class="streak-dot ${r.correct?'correct':'wrong'}">${r.correct?'✓':'✗'}</div>`}
+    // Max: never reveal correct/wrong during the quiz — just show neutral dots
+    if(!isMax&&i<S.results.length){const r=S.results[i];return`<div class="streak-dot ${r.correct?'correct':'wrong'}">${r.correct?'✓':'✗'}</div>`}
     if(i===S.qIndex&&S.screen==='quiz')return`<div class="streak-dot current">${i+1}</div>`;
     return`<div class="streak-dot">${i+1}</div>`;
   }).join('');
@@ -2375,21 +2377,21 @@ function render(){
   // === SORT-ORDER TYPE (drag numbers into order for median) ===
   if(q.type==="sort-order"){
     if(!q._order)q._order=[...q.tiles];
-    const isSorted=q._sortCorrect;
+    const orderDone=q._orderDone; // order confirmed correct, now enter median
     const tilesHTML=q._order.map((v,i)=>{
       let cls="sort-tile";
-      if(isSorted){cls+=q.medianIdx&&q.medianIdx.includes(i)?" median-hl":" sorted-ok";}
-      return `<div class="${cls}"${!isSorted?` draggable="true" data-idx="${i}"`:""}>${v}</div>`;
+      if(orderDone){cls+=q.medianIdx&&q.medianIdx.includes(i)?" median-hl":" sorted-ok";}
+      return `<div class="${cls}"${!orderDone?` draggable="true" data-idx="${i}"`:""}>${v}</div>`;
     }).join("");
     let sortFb="";
     if(S.feedback){
       const f=S.feedback;
-      const pfx=f.type==="correct"?"🎉 TOUCHDOWN! ":f.type==="hint"?"💡 Coach says: ":f.type==="tryAgain"?"🔄 Keep going: ":"";
+      const pfx=f.type==="hint"?"💡 Coach says: ":f.type==="tryAgain"?"🔄 Keep going: ":"";
       sortFb=`<div class="feedback ${f.type}"><p>${pfx}${f.msg}</p></div>`;
     }
-    const sortBtn=!isSorted?`<button class="btn-check" style="width:100%;margin-top:14px" onclick="checkSortOrder()">Check Order ✓</button>`:"";
-    const nxBtn=isSorted?`<button class="btn-next" onclick="next()">${S.qIndex+1<numQ?"NEXT PLAY →":"SEE FINAL SCORE 🏆"}</button>`:"";
-    const hintBtn=!isSorted&&maxHints>S.hintsUsed?`<button class="hint-btn" onclick="getHint()">💡 ${S.hintsUsed===0?"Get a hint":"One more hint"} (${maxHints-S.hintsUsed} left)</button>`:"";
+    const sortBtn=!orderDone?`<button class="btn-check" style="width:100%;margin-top:14px" onclick="checkSortOrder()">Check Order ✓</button>`:"";
+    const medianInput=orderDone?`<div class="input-row" style="margin-top:14px"><input type="number" step="any" id="median-ans" placeholder="What's the median?" style="font-size:20px;text-align:center" onkeydown="if(event.key==='Enter')checkMedianAnswer()"><button class="btn-check" onclick="checkMedianAnswer()">CHECK</button></div>`:"";
+    const hintBtn=!orderDone&&maxHints>S.hintsUsed?`<button class="hint-btn" onclick="getHint()">💡 ${S.hintsUsed===0?"Get a hint":"One more hint"} (${maxHints-S.hintsUsed} left)</button>`:"";
     app.innerHTML=`<div><div class="card">
       <div class="header-bar">
         <div class="logo">${topic.icon}</div>
@@ -2401,14 +2403,17 @@ function render(){
       <span class="level-badge" style="background:${lc};color:${ltc}">${q.level}</span>
       <div class="teach-box"><p>📖 <strong>Learn:</strong> ${q.teach}</p></div>
       <div class="question-box"><p>${q.question}</p></div>
-      <div class="sort-prompt">${isSorted?"✅ Sorted! The highlighted number(s) show the median:":"Drag the tiles to put them in order ↓"}</div>
+      <div class="sort-prompt">${orderDone?"✅ Order correct! Now enter the median:":"Drag the tiles to put them in order ↓"}</div>
       <div class="sort-area" id="sort-area">${tilesHTML}</div>
-      ${!isSorted?sortBtn:""}
-      ${hintBtn}${sortFb}${nxBtn}
+      ${!orderDone?sortBtn:""}
+      ${medianInput}
+      ${hintBtn}${sortFb}
       <div style="text-align:center"><button class="btn-back" onclick="goHome()">← Back to topics</button></div>
     </div></div>`;
+    // Focus median input if order is done
+    if(orderDone){const el=document.getElementById("median-ans");if(el)el.focus();}
     // Init drag-and-drop
-    if(!isSorted){
+    if(!orderDone){
       let _dragSrc=null;
       const area=document.getElementById("sort-area");
       if(area){
@@ -2659,15 +2664,25 @@ function checkSortOrder(){
   const q=S.questions[S.qIndex];
   const correct=q._order.join(",")===q.sorted.join(",");
   if(correct){
-    S.score++;confetti(getConfettiColors());
-    S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:S.attempts+1,userAnswer:q._order.join(", ")});
-    // Auto-advance without showing answer (Max-only feature — sort-order is always Max)
-    setTimeout(next,500);
+    q._orderDone=true;
+    S.feedback=null;
   }else{
     S.attempts++;
     S.feedback={type:"tryAgain",msg:`Not in order yet — keep rearranging!`};
-    render();
   }
+  render();
+}
+
+function checkMedianAnswer(){
+  const q=S.questions[S.qIndex];
+  const el=document.getElementById("median-ans");
+  if(!el)return;
+  const uv=el.value.trim();
+  if(!uv)return;
+  const ok=Math.abs(Number(uv)-q.answer)<0.01;
+  if(ok){S.score++;confetti(getConfettiColors());S.results.push({correct:true,hintsUsed:S.hintsUsed,attempts:S.attempts+1,userAnswer:uv});}
+  else{S.results.push({correct:false,hintsUsed:S.hintsUsed,attempts:S.attempts+1,userAnswer:uv});}
+  setTimeout(next,400);
 }
 
 function getHint(){
