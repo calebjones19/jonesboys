@@ -1225,6 +1225,187 @@ function genStats(){
   ];
   return pick(G)();
 }
+// ======== RATIOS & PROPORTIONAL RELATIONSHIPS (12 templates) ========
+function genProportional(){
+  const G=[
+    // 1. Find constant of proportionality k from a table
+    function(){
+      const k=rand(2,9);
+      const xs=[1,2,3,4,5];
+      const rows=xs.map(x=>`<td style="padding:6px 14px;border:1px solid #cbd5e1;text-align:center">${x}</td>`).join("");
+      const rows2=xs.map(x=>`<td style="padding:6px 14px;border:1px solid #cbd5e1;text-align:center">${k*x}</td>`).join("");
+      const tbl=`<table style="border-collapse:collapse;margin:10px auto;font-family:'Russo One',sans-serif"><tr><td style="padding:6px 14px;border:1px solid #cbd5e1;background:#f1f5f9;font-weight:700">x</td>${rows}</tr><tr><td style="padding:6px 14px;border:1px solid #cbd5e1;background:#f1f5f9;font-weight:700">y</td>${rows2}</tr></table>`;
+      return{teach:"The constant of proportionality k is found by dividing y ÷ x. It stays the same for every row in a proportional table!",
+        question:`The table shows a proportional relationship. What is the constant of proportionality (k)?`,
+        visual:tbl,answer:k,type:"number",level:"Warm-Up",
+        hint1:`Pick any row and divide y ÷ x.`,
+        hint2:`Try the first column: ${k} ÷ 1 = ___`,
+        explanation:`y ÷ x = ${k} for every row. So k = ${k} and y = ${k}x! ✅`};
+    },
+    // 2. Complete the table — find missing y value
+    function(){
+      const k=rand(2,8);
+      const xs=[1,2,3,4,5,6];const missingX=xs[rand(1,5)];
+      const display=xs.map(x=>x===missingX?`<td style="padding:6px 14px;border:2px solid #E23636;text-align:center;background:#fff0f0;font-weight:700">?</td>`:`<td style="padding:6px 14px;border:1px solid #cbd5e1;text-align:center">${k*x}</td>`).join("");
+      const xrow=xs.map(x=>`<td style="padding:6px 14px;border:1px solid #cbd5e1;text-align:center">${x}</td>`).join("");
+      const tbl=`<table style="border-collapse:collapse;margin:10px auto;font-family:'Russo One',sans-serif"><tr><td style="padding:6px 14px;border:1px solid #cbd5e1;background:#f1f5f9;font-weight:700">x</td>${xrow}</tr><tr><td style="padding:6px 14px;border:1px solid #cbd5e1;background:#f1f5f9;font-weight:700">y</td>${display}</tr></table>`;
+      return{teach:"In a proportional table, y = k × x. Find k first, then multiply!",
+        question:`Complete the table. What is the missing value of y when x = ${missingX}?`,
+        visual:tbl,answer:k*missingX,type:"number",level:"Warm-Up",
+        hint1:`Find the pattern: what do you multiply x by to get y?`,
+        hint2:`k = ${k}, so y = ${k} × ${missingX} = ___`,
+        explanation:`y = ${k} × ${missingX} = ${k*missingX}! ✅`};
+    },
+    // 3. Complete the table — find missing x value
+    function(){
+      const k=rand(2,9);
+      const ys=[k,k*2,k*3,k*4,k*5];const missingIdx=rand(1,4);const missingY=ys[missingIdx];const missingX=missingIdx+1;
+      const xrow=ys.map((_,i)=>i===missingIdx?`<td style="padding:6px 14px;border:2px solid #E23636;text-align:center;background:#fff0f0;font-weight:700">?</td>`:`<td style="padding:6px 14px;border:1px solid #cbd5e1;text-align:center">${i+1}</td>`).join("");
+      const yrow=ys.map(y=>`<td style="padding:6px 14px;border:1px solid #cbd5e1;text-align:center">${y}</td>`).join("");
+      const tbl=`<table style="border-collapse:collapse;margin:10px auto;font-family:'Russo One',sans-serif"><tr><td style="padding:6px 14px;border:1px solid #cbd5e1;background:#f1f5f9;font-weight:700">x</td>${xrow}</tr><tr><td style="padding:6px 14px;border:1px solid #cbd5e1;background:#f1f5f9;font-weight:700">y</td>${yrow}</tr></table>`;
+      return{teach:"To find x when you know y: divide y ÷ k. Since y = kx, then x = y ÷ k!",
+        question:`Complete the table. What is the missing value of x when y = ${missingY}?`,
+        visual:tbl,answer:missingX,type:"number",level:"Building Up",
+        hint1:`y = k × x, so x = y ÷ k. What is k?`,
+        hint2:`k = ${k}, so x = ${missingY} ÷ ${k} = ___`,
+        explanation:`x = ${missingY} ÷ ${k} = ${missingX}! ✅`};
+    },
+    // 4. Unit rate — find rate from total
+    function(){
+      const scenarios=[
+        {a:"A car travels",b:"miles in",c:"hours",d:"miles per hour"},
+        {a:"A printer prints",b:"pages in",c:"minutes",d:"pages per minute"},
+        {a:"A faucet drips",b:"ounces in",c:"minutes",d:"ounces per minute"},
+        {a:"A factory makes",b:"parts in",c:"hours",d:"parts per hour"},
+        {a:"A cyclist rides",b:"miles in",c:"hours",d:"miles per hour"}
+      ];
+      const s=pick(scenarios);const unit=rand(8,25);const count=rand(2,6);const total=unit*count;
+      return{teach:"Unit rate = total ÷ number of units. It tells you the amount per ONE unit!",
+        question:`${s.a} ${total} ${s.b} ${count} ${s.c}. What is the ${s.d}?`,
+        answer:unit,type:"number",level:"Warm-Up",
+        hint1:`Divide the total by the number of ${s.c}.`,
+        hint2:`${total} ÷ ${count} = ___`,
+        explanation:`${total} ÷ ${count} = ${unit} ${s.d}! ✅`};
+    },
+    // 5. Scale up using unit rate
+    function(){
+      const items=[
+        {thing:"oranges",cost:rand(3,9)},{thing:"notebooks",cost:rand(2,6)},
+        {thing:"water bottles",cost:rand(4,8)},{thing:"granola bars",cost:rand(1,4)},
+        {thing:"pens",cost:rand(2,5)}
+      ];
+      const s=pick(items);const n=rand(5,12);const total=s.cost*n;
+      return{teach:"Once you know the unit rate (cost per 1 item), multiply by how many you want!",
+        question:`${pick(PLAYERS)} buys ${n} ${s.thing} at $${s.cost} each. How much does he spend in total?`,
+        answer:total,type:"number",level:"Warm-Up",
+        hint1:`Unit rate = $${s.cost} per ${s.thing.slice(0,-1)}. Multiply by how many.`,
+        hint2:`$${s.cost} × ${n} = ___`,
+        explanation:`$${s.cost} × ${n} = $${total}! ✅`};
+    },
+    // 6. y = kx — find y given x
+    function(){
+      const k=rand(3,12);const x=rand(3,10);const y=k*x;
+      const contexts=[
+        `A pool fills at ${k} gallons per minute. How many gallons after ${x} minutes?`,
+        `${pick(PLAYERS)} earns $${k} per hour. How much does he earn in ${x} hours?`,
+        `A car gets ${k} miles per gallon. How far on ${x} gallons?`,
+        `A recipe needs ${k} cups of flour per batch. How much for ${x} batches?`
+      ];
+      return{teach:"In y = kx, plug in what you know and multiply! k is always the rate per 1 unit.",
+        question:pick(contexts),
+        answer:y,type:"number",level:"Building Up",
+        hint1:`The equation is y = ${k}x. Plug in x = ${x}.`,
+        hint2:`y = ${k} × ${x} = ___`,
+        explanation:`y = ${k} × ${x} = ${y}! ✅`};
+    },
+    // 7. y = kx — find x given y
+    function(){
+      const k=rand(3,10);const x=rand(4,12);const y=k*x;
+      const contexts=[
+        {q:`A car gets ${k} miles per gallon. How many gallons are needed for ${y} miles?`,unit:"gallons"},
+        {q:`${pick(PLAYERS)} earns $${k} per hour. How many hours to earn $${y}?`,unit:"hours"},
+        {q:`A machine produces ${k} parts per hour. How many hours to make ${y} parts?`,unit:"hours"},
+        {q:`A garden hose fills ${k} gallons per minute. How many minutes to fill ${y} gallons?`,unit:"minutes"}
+      ];
+      const s=pick(contexts);
+      return{teach:"If y = kx and you know y, solve for x by dividing: x = y ÷ k!",
+        question:s.q,
+        answer:x,type:"number",level:"Building Up",
+        hint1:`y = kx, so x = y ÷ k.`,
+        hint2:`x = ${y} ÷ ${k} = ___`,
+        explanation:`x = ${y} ÷ ${k} = ${x} ${s.unit}! ✅`};
+    },
+    // 8. Map scale problem
+    function(){
+      const scale=pick([10,20,25,50,100]);const inches=rand(2,9);const miles=scale*inches;
+      return{teach:"Map problems are proportional! Set up the ratio: map inches / real miles = map inches / real miles.",
+        question:`A map has a scale of 1 inch = ${scale} miles. Two cities are ${inches} inches apart on the map. How many miles apart are they in real life?`,
+        answer:miles,type:"number",level:"Building Up",
+        hint1:`Set up the proportion: 1/${scale} = ${inches}/?`,
+        hint2:`Multiply both sides by ${inches}: ? = ${scale} × ${inches} = ___`,
+        explanation:`${scale} × ${inches} = ${miles} miles! ✅`};
+    },
+    // 9. Recipe scaling
+    function(){
+      const ingredient=pick(["cups of flour","tablespoons of butter","teaspoons of sugar","eggs","cups of milk"]);
+      const perBatch=rand(2,5);const batches=rand(3,8);const total=perBatch*batches;
+      return{teach:"Recipe scaling is a proportional relationship. Amount = (per batch) × (number of batches).",
+        question:`A recipe needs ${perBatch} ${ingredient} per batch. How many ${ingredient} are needed for ${batches} batches?`,
+        answer:total,type:"number",level:"Warm-Up",
+        hint1:`Set up the ratio: ${perBatch} per 1 batch. Multiply by ${batches}.`,
+        hint2:`${perBatch} × ${batches} = ___`,
+        explanation:`${perBatch} × ${batches} = ${total} ${ingredient}! ✅`};
+    },
+    // 10. Better buy (unit rate comparison)
+    function(){
+      const item=pick(["juice boxes","granola bars","pens","erasers","stickers"]);
+      const ua=rand(2,5);const ub=ua+rand(1,3);
+      const qa=rand(3,6);const qb=qa+rand(2,5);
+      const totalA=ua*qa;const totalB=ub*qb;
+      const betterPack=totalA/qa<totalB/qb?"Pack A":"Pack B";
+      const rateA=(totalA/qa).toFixed(2);const rateB=(totalB/qb).toFixed(2);
+      return{teach:"To find the better deal, calculate the unit rate (cost per item) for each option and compare!",
+        question:`Pack A: ${qa} ${item} for $${totalA}. Pack B: ${qb} ${item} for $${totalB}. Which pack has the lower price per item?`,
+        answer:betterPack,type:"choice",choices:["Pack A","Pack B"],level:"Challenge",
+        hint1:`Find the cost per item for each pack: total ÷ quantity.`,
+        hint2:`Pack A: $${totalA} ÷ ${qa} = $${rateA} each. Pack B: $${totalB} ÷ ${qb} = $${rateB} each.`,
+        explanation:`Pack A = $${rateA}/item, Pack B = $${rateB}/item. ${betterPack} is the better deal! ✅`};
+    },
+    // 11. Proportional or not? (choice)
+    function(){
+      const k=rand(2,8);
+      const xs=[1,2,3,4];
+      const isProportional=Math.random()>0.4;
+      const ys=isProportional?xs.map(x=>k*x):xs.map((x,i)=>k*x+(i===2?rand(1,5):0));
+      const pairs=xs.map((x,i)=>`(${x}, ${ys[i]})`).join(" | ");
+      const answer=isProportional?"Yes":"No";
+      return{teach:"A proportional relationship always passes through (0,0) and has a constant y÷x ratio. Check every pair!",
+        question:`Do these ordered pairs show a proportional relationship? ${pairs}`,
+        answer,type:"choice",choices:["Yes","No"],level:"Challenge",
+        hint1:`Divide y ÷ x for every pair. If the answer is always the same, it's proportional.`,
+        hint2:isProportional?`Every y ÷ x = ${k}. The ratio is constant!`:`Check the 3rd pair — y ÷ x ≠ ${k}. The ratio changes!`,
+        explanation:isProportional?`y ÷ x = ${k} for all pairs — proportional! ✅`:`The ratio y÷x is not the same for every pair — NOT proportional! ✅`};
+    },
+    // 12. Cross multiplication — solve for missing term
+    function(){
+      const a=rand(2,10);const b=rand(2,10);const c=rand(2,10);const d=b*c/a;
+      if(!Number.isInteger(d)||d>50)return G[0]();
+      const contexts=[
+        `${a} pounds of apples cost $${b}. How much do ${c} pounds cost?`,
+        `${a} gallons of paint covers ${b} walls. How many walls can ${c} gallons cover?`,
+        `${a} tickets cost $${b}. How much do ${c} tickets cost?`,
+        `${a} meters of rope weighs ${b} kg. How much does ${c} meters weigh?`
+      ];
+      return{teach:"Set up a proportion: a/b = c/? then cross-multiply to solve!",
+        question:pick(contexts),
+        answer:d,type:"number",level:"Challenge",
+        hint1:`Set up the proportion: ${a}/${b} = ${c}/?`,
+        hint2:`Cross multiply: ${a} × ? = ${b} × ${c} = ${b*c}. Divide by ${a}: ___`,
+        explanation:`${b} × ${c} ÷ ${a} = ${d}! ✅`};
+    }
+  ];
+  return pick(G)();
+}
 // ============ TOPIC CONFIG ============
 // ======== RETAKE PREP: Ratios Quiz 5 (6.RP.A.1, 6.RP.A.3a) ========
 function genRetakeRatios(){
@@ -1451,7 +1632,9 @@ const TOPICS=[
   {id:"geometry",name:"Area & Perimeter",icon:"📐",desc:"Rectangles, triangles & more",gen:genGeometry,
    takeaway:"Area = space inside (sq units). Perimeter = distance around. Know your formulas!"},
   {id:"stats",name:"Mean, Median & Range",icon:"📊",desc:"Averages, middle & spread",gen:genStats,
-   takeaway:"Mean = sum ÷ count. Median = middle value (order first!). Mode = most frequent. Range = max − min."}
+   takeaway:"Mean = sum ÷ count. Median = middle value (order first!). Mode = most frequent. Range = max − min."},
+  {id:"proportional",name:"Ratios & Proportional Relationships",icon:"📈",desc:"Tables, unit rates & y = kx",gen:genProportional,
+   takeaway:"In y = kx, k is the constant of proportionality (unit rate). To find k: divide y ÷ x. To complete a table: multiply or divide using k. For proportions: cross-multiply to solve!"}
 ];
 
 // ============ MAVERICK'S THEME DATA ============
