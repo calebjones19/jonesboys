@@ -1616,6 +1616,394 @@ function genRetakeRatios(){
   return pick(G)();
 }
 
+// ======== UNIT 5 STUDY GUIDE: Ratios & Rates (6.RP.A.1, 6.RP.A.3a/b/d) ========
+function genUnit5Ratios(){
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const rnd=(lo,hi)=>Math.floor(Math.random()*(hi-lo+1))+lo;
+
+  const G=[
+    // ─── 1. Part-to-part ratio from a total ───
+    function(){
+      const items=[
+        {thing:"boys","other":"girls"},
+        {thing:"cats","other":"dogs"},
+        {thing:"red marbles","other":"blue marbles"},
+        {thing:"apples","other":"oranges"},
+        {thing:"soccer players","other":"basketball players"}
+      ];
+      const ctx=pick(items);
+      const pa=rnd(2,7),pb=rnd(2,7);
+      const mult=rnd(2,5);
+      const total=(pa+pb)*mult;
+      const ansA=pa*mult,ansB=pb*mult;
+      return{
+        teach:`Part-to-part ratio compares one group to another. If the ratio of ${ctx.thing} to ${ctx.other} is ${pa}:${pb} and the total is ${total}, scale up: multiply each part by ${total}÷${pa+pb}=${mult}.`,
+        question:`The ratio of ${ctx.thing} to ${ctx.other} is ${pa}:${pb}. There are ${total} total. How many ${ctx.thing} are there?`,
+        answer:ansA,type:"number",level:"Warm-Up",
+        explanation:`Total parts = ${pa}+${pb}=${pa+pb}. Scale factor = ${total}÷${pa+pb}=${mult}. ${ctx.thing}: ${pa}×${mult}=${ansA} ✅`
+      };
+    },
+    // ─── 2. Part-to-whole ratio ───
+    function(){
+      const items=[
+        {thing:"seniors","group":"students"},
+        {thing:"cats","group":"pets"},
+        {thing:"red cars","group":"cars"},
+        {thing:"chocolate muffins","group":"muffins"}
+      ];
+      const ctx=pick(items);
+      const pa=rnd(2,8),pb=rnd(2,8);
+      const total=pa+pb;
+      return{
+        teach:`Part-to-whole ratio compares one group to the total. If ${ctx.thing}:${ctx.group} is ${pa}:${total}, the denominator includes ALL groups.`,
+        question:`There are ${pa} ${ctx.thing} and ${pb} other ${ctx.group}. What is the part-to-whole ratio of ${ctx.thing} to total ${ctx.group}?`,
+        answer:`${pa}:${total}`,type:"choice",level:"Warm-Up",
+        choices:[`${pa}:${pb}`,`${pa}:${total}`,`${pb}:${total}`,`${total}:${pa}`],
+        explanation:`Part-to-whole = ${pa}:(${pa}+${pb}) = ${pa}:${total} ✅`
+      };
+    },
+    // ─── 3. Identify part-to-part vs part-to-whole ───
+    function(){
+      const scenarios=[
+        {q:`A class has 12 boys and 15 girls. Which ratio is part-to-whole?`,choices:["12:15","12:27","15:12","27:12"],ans:"12:27",exp:`Total students = 12+15=27. Part-to-whole = 12:27 (boys to total) ✅`},
+        {q:`A bag has 8 red and 6 green candies. Which ratio is part-to-part?`,choices:["8:14","6:14","8:6","14:8"],ans:"8:6",exp:`Part-to-part compares group to group: 8 red to 6 green = 8:6 ✅`},
+        {q:`A shelter has 5 cats and 11 dogs. Which shows part-to-whole for dogs?`,choices:["11:5","5:16","11:16","5:11"],ans:"11:16",exp:`Total animals = 5+11=16. Dogs to total = 11:16 ✅`},
+        {q:`A box has 9 pencils and 3 pens. Which ratio is part-to-whole for pencils?`,choices:["9:3","3:12","9:12","12:9"],ans:"9:12",exp:`Total = 9+3=12. Pencils to total = 9:12 ✅`}
+      ];
+      const s=pick(scenarios);
+      return{teach:`Part-to-part: one group vs another group. Part-to-whole: one group vs the TOTAL.`,
+        question:s.q,answer:s.ans,type:"choice",level:"Warm-Up",choices:s.choices,explanation:s.exp};
+    },
+    // ─── 4. Complete a ratio table (find missing y) ───
+    function(){
+      const contexts=[
+        {x:"hours",y:"miles",k:rnd(30,65)},
+        {x:"pounds",y:"dollars",k:rnd(2,8)},
+        {x:"gallons",y:"miles",k:rnd(20,40)},
+        {x:"boxes",y:"items",k:rnd(12,30)}
+      ];
+      const ctx=pick(contexts);
+      const xVal=rnd(3,9);
+      const ans=ctx.k*xVal;
+      return{
+        teach:`In a ratio table, y = k × x where k is the constant rate. Find k from a known pair, then multiply.`,
+        question:`A ratio table shows: when x=${ctx.k} ${ctx.y} for every 1 ${ctx.x}. If x = ${xVal} ${ctx.x}, what is y?`,
+        answer:ans,type:"number",level:"Warm-Up",
+        explanation:`k = ${ctx.k} ${ctx.y} per ${ctx.x}. y = ${ctx.k} × ${xVal} = ${ans} ✅`
+      };
+    },
+    // ─── 5. Scale ratio to find missing value in table (given two columns) ───
+    function(){
+      const tables=[
+        {label1:"x",label2:"y",pairs:[[3,4],[6,8],[9,12]],miss:rnd(0,2)},
+        {label1:"x",label2:"y",pairs:[[3,5],[6,10],[9,15]],miss:rnd(0,2)},
+        {label1:"hours",label2:"pages",pairs:[[2,30],[4,60],[6,90]],miss:rnd(0,2)},
+        {label1:"feet",label2:"inches",pairs:[[1,12],[3,36],[5,60]],miss:rnd(0,2)}
+      ];
+      const t=pick(tables);
+      const mRow=t.pairs[t.miss];
+      const ans=mRow[1];
+      const known=t.pairs.find(p=>p!==mRow);
+      const tableHTML=`<table style='border-collapse:collapse;margin:10px auto;font-size:16px'>`+
+        `<tr><th style='border:2px solid #0076B6;padding:6px 14px;background:#e0f0ff'>${t.label1}</th>`+
+        `<th style='border:2px solid #0076B6;padding:6px 14px;background:#e0f0ff'>${t.label2}</th></tr>`+
+        t.pairs.map((p,i)=>`<tr><td style='border:2px solid #cbd5e1;padding:6px 14px;text-align:center'>${p[0]}</td>`+
+          `<td style='border:2px solid #cbd5e1;padding:6px 14px;text-align:center'>${i===t.miss?"?":p[1]}</td></tr>`).join("")+
+        `</table>`;
+      const sf=mRow[0]/known[0];
+      return{
+        teach:`In a proportional table, every row uses the same scale factor. Find the multiplier from a complete row, then apply it.`,
+        question:`Complete the ratio table. What is the missing value?${tableHTML}`,
+        answer:ans,type:"number",level:"Warm-Up",
+        explanation:`Scale factor from row (${known[0]},${known[1]}) to row (${mRow[0]},?): ${mRow[0]}÷${known[0]}=${sf}. Answer: ${known[1]}×${sf}=${ans} ✅`
+      };
+    },
+    // ─── 6. Unit rate word problem (rate × time) ───
+    function(){
+      const scenarios=[
+        {who:"Jasmine",thing:"words per minute",verb:"types",unit:"words",rate:rnd(35,60),time:rnd(40,90)},
+        {who:"Coach",thing:"cars per hour",verb:"washes",unit:"cars",rate:rnd(4,12),time:rnd(3,8)},
+        {who:"A machine",thing:"bottles per minute",verb:"fills",unit:"bottles",rate:rnd(20,50),time:rnd(10,30)},
+        {who:"A printer",thing:"pages per minute",verb:"prints",unit:"pages",rate:rnd(8,20),time:rnd(5,15)}
+      ];
+      const s=pick(scenarios);
+      const ans=s.rate*s.time;
+      return{
+        teach:`Unit rate × time = total amount. Set up: rate × time = answer.`,
+        question:`${s.who} ${s.verb} at ${s.rate} ${s.thing}. How many ${s.unit} in ${s.time} minutes?`,
+        answer:ans,type:"number",level:"Core Skill",
+        explanation:`${s.rate} ${s.thing} × ${s.time} min = ${ans} ${s.unit} ✅`
+      };
+    },
+    // ─── 7. Unit rate with a break (subtract break time first) ───
+    function(){
+      const wpm=rnd(30,60);
+      const totalMin=rnd(60,120);
+      const breakMin=pick([5,10,15,20]);
+      const workMin=totalMin-breakMin;
+      const ans=wpm*workMin;
+      return{
+        teach:`Subtract break time first, THEN multiply by the unit rate. Working time = total − break.`,
+        question:`A student types ${wpm} words per minute. She works for ${totalMin} minutes but takes a ${breakMin}-minute break. How many words does she type?`,
+        answer:ans,type:"number",level:"Core Skill",
+        explanation:`Working minutes: ${totalMin}−${breakMin}=${workMin}. Words: ${wpm}×${workMin}=${ans} ✅`
+      };
+    },
+    // ─── 8. Unit conversion — customary (given conversion fact) ───
+    function(){
+      const conversions=[
+        {from:"gallons",to:"ounces",factor:128,amt:rnd(2,8)},
+        {from:"yards",to:"inches",factor:36,amt:rnd(2,6)},
+        {from:"pounds",to:"ounces",factor:16,amt:rnd(3,10)},
+        {from:"miles",to:"feet",factor:5280,amt:rnd(2,5)},
+        {from:"feet",to:"inches",factor:12,amt:rnd(3,12)}
+      ];
+      const c=pick(conversions);
+      const ans=c.factor*c.amt;
+      return{
+        teach:`Unit conversion: multiply by the conversion factor. 1 ${c.from} = ${c.factor} ${c.to}. So ${c.amt} ${c.from} = ${c.amt} × ${c.factor}.`,
+        question:`How many ${c.to} are in ${c.amt} ${c.from}? (1 ${c.from} = ${c.factor} ${c.to})`,
+        answer:ans,type:"number",level:"Core Skill",
+        explanation:`${c.amt} × ${c.factor} = ${ans} ${c.to} ✅`
+      };
+    },
+    // ─── 9. Unit conversion — metric ───
+    function(){
+      const conversions=[
+        {from:"liters",to:"milliliters",factor:1000,amt:rnd(2,8)},
+        {from:"kilometers",to:"meters",factor:1000,amt:rnd(2,10)},
+        {from:"kilograms",to:"grams",factor:1000,amt:rnd(2,7)},
+        {from:"meters",to:"centimeters",factor:100,amt:rnd(3,12)}
+      ];
+      const c=pick(conversions);
+      const ans=c.factor*c.amt;
+      return{
+        teach:`Metric conversions use powers of 10. 1 ${c.from} = ${c.factor} ${c.to}. Multiply to go to smaller units.`,
+        question:`How many ${c.to} are in ${c.amt} ${c.from}? (1 ${c.from} = ${c.factor} ${c.to})`,
+        answer:ans,type:"number",level:"Core Skill",
+        explanation:`${c.amt} × ${c.factor} = ${ans} ${c.to} ✅`
+      };
+    },
+    // ─── 10. Select correct conversion expression (multiple choice) ───
+    function(){
+      const problems=[
+        {q:`Which expression correctly converts 3 yards to inches?`,
+         ans:`3 × 36`,choices:[`3 × 12`,`3 × 36`,`3 ÷ 36`,`3 × 3`],
+         exp:`1 yard = 3 feet = 36 inches. So 3 × 36 = 108 inches ✅`},
+        {q:`Which expression correctly converts 4 feet to inches?`,
+         ans:`4 × 12`,choices:[`4 ÷ 12`,`4 × 3`,`4 × 12`,`4 + 12`],
+         exp:`1 foot = 12 inches. So 4 × 12 = 48 inches ✅`},
+        {q:`Which expression correctly converts 24 inches to feet?`,
+         ans:`24 ÷ 12`,choices:[`24 × 12`,`24 ÷ 3`,`24 ÷ 12`,`24 × 36`],
+         exp:`1 foot = 12 inches, so divide: 24 ÷ 12 = 2 feet ✅`},
+        {q:`Which expression correctly converts 5 liters to milliliters?`,
+         ans:`5 × 1000`,choices:[`5 × 100`,`5 ÷ 1000`,`5 × 1000`,`5 + 1000`],
+         exp:`1 liter = 1000 mL. So 5 × 1000 = 5000 mL ✅`},
+        {q:`Which expression correctly converts 3000 meters to kilometers?`,
+         ans:`3000 ÷ 1000`,choices:[`3000 × 1000`,`3000 ÷ 100`,`3000 ÷ 1000`,`3000 × 100`],
+         exp:`1 km = 1000 m, so divide: 3000 ÷ 1000 = 3 km ✅`}
+      ];
+      const p=pick(problems);
+      return{teach:`To convert: multiply when going to smaller units, divide when going to larger units. Set up the conversion fraction so unwanted units cancel.`,
+        question:p.q,answer:p.ans,type:"choice",level:"Core Skill",choices:p.choices,explanation:p.exp};
+    },
+    // ─── 11. Unit price calculation ───
+    function(){
+      const items=[
+        {item:"shirts",qty:rnd(3,8),total:null},
+        {item:"granola bars",qty:rnd(4,10),total:null},
+        {item:"notebooks",qty:rnd(2,6),total:null},
+        {item:"water bottles",qty:rnd(3,9),total:null}
+      ];
+      const ctx=pick(items);
+      const unitPrice=(rnd(10,50)*0.25);
+      const total=+(unitPrice*ctx.qty).toFixed(2);
+      const ans=+unitPrice.toFixed(2);
+      return{
+        teach:`Unit price = total cost ÷ number of items. This gives the cost per one item.`,
+        question:`${ctx.qty} ${ctx.item} cost $${total.toFixed(2)}. What is the unit price per ${ctx.item.slice(0,-1)}?`,
+        answer:ans,type:"number",level:"Core Skill",
+        explanation:`$${total.toFixed(2)} ÷ ${ctx.qty} = $${ans.toFixed(2)} per ${ctx.item.slice(0,-1)} ✅`
+      };
+    },
+    // ─── 12. Better buy (compare unit rates) ───
+    function(){
+      const scenarios=[
+        ()=>{
+          const q1=rnd(4,8),p1=+(q1*rnd(2,5)*0.25).toFixed(2);
+          const q2=rnd(8,16),p2=+(q2*(p1/q1-0.15)).toFixed(2);
+          const ur1=+(p1/q1).toFixed(3),ur2=+(p2/q2).toFixed(3);
+          const better=ur1<ur2?"Option A":"Option B";
+          return{q:`Option A: ${q1} items for $${p1.toFixed(2)}. Option B: ${q2} items for $${p2.toFixed(2)}. Which is the better buy (lower price per item)?`,
+            ans:better,choices:["Option A","Option B"],
+            exp:`Option A: $${p1.toFixed(2)}÷${q1}=$${ur1}/item. Option B: $${p2.toFixed(2)}÷${q2}=$${ur2}/item. ${better} is cheaper per item ✅`};
+        },
+        ()=>{
+          const yd1=pick([40,50,60]),ppy1=+(rnd(28,45)*0.01).toFixed(2);
+          const yd2=yd1+pick([10,20]),ppy2=+(ppy1-0.05-rnd(0,5)*0.01).toFixed(2);
+          const cost1=+(yd1*ppy1).toFixed(2),cost2=+(yd2*ppy2).toFixed(2);
+          const better=ppy1<ppy2?"Option A":"Option B";
+          return{q:`Spool A: ${yd1} yards for $${cost1.toFixed(2)}. Spool B: ${yd2} yards for $${cost2.toFixed(2)}. Which spool has the lower price per yard?`,
+            ans:better,choices:["Option A","Option B"],
+            exp:`Spool A: $${cost1.toFixed(2)}÷${yd1}=$${ppy1}/yd. Spool B: $${cost2.toFixed(2)}÷${yd2}=$${ppy2}/yd. ${better} is cheaper ✅`};
+        }
+      ];
+      const s=pick(scenarios)();
+      return{teach:`To find the better buy, calculate the unit price for each option (total ÷ quantity). The smaller number = better deal!`,
+        question:s.q,answer:s.ans,type:"choice",level:"Challenge",choices:s.choices,explanation:s.exp};
+    },
+    // ─── 13. Equivalent ratios — find scale factor ───
+    function(){
+      const a=rnd(2,9),b=rnd(2,9),k=rnd(2,7);
+      const bigA=a*k,bigB=b*k;
+      const askA=Math.random()<0.5;
+      const ans=askA?bigA:bigB;
+      const missing=askA?`?:${bigB}`:askA?`?:${bigB}`:`${bigA}:?`;
+      return{
+        teach:`Equivalent ratios: multiply BOTH numbers by the same scale factor. If ${a}:${b} = ?:${bigB}, find how many times bigger ${bigB} is than ${b}: ${bigB}÷${b}=${k}. Then multiply: ${a}×${k}=${bigA}.`,
+        question:`Complete the equivalent ratio: ${a}:${b} = ${missing}`,
+        answer:ans,type:"number",level:"Core Skill",
+        explanation:`Scale factor = ${askA?bigB:bigA}÷${askA?b:a}=${k}. Missing value = ${askA?a:b}×${k}=${ans} ✅`
+      };
+    },
+    // ─── 14. Ratio table — find y given x using k ───
+    function(){
+      const contexts=[
+        {x:"hours",y:"miles",k:rnd(45,70)},
+        {x:"days",y:"dollars earned",k:rnd(50,150)},
+        {x:"pounds",y:"cost ($)",k:+(rnd(10,40)*0.25).toFixed(2)},
+        {x:"minutes",y:"calories burned",k:rnd(8,15)}
+      ];
+      const ctx=pick(contexts);
+      const xVal=rnd(2,10);
+      const ans=+(ctx.k*xVal).toFixed(2);
+      return{
+        teach:`y = k × x. k is the unit rate (value per 1 unit of x). Multiply k × x to find y.`,
+        question:`In a proportional relationship, y = ${ctx.k} × x. What is y when x = ${xVal}?`,
+        answer:ans,type:"number",level:"Core Skill",
+        explanation:`y = ${ctx.k} × ${xVal} = ${ans} ✅`
+      };
+    },
+    // ─── 15. Part-to-whole: find one group given the other and ratio ───
+    function(){
+      const items=[
+        {a:"juniors",b:"seniors",aratio:4,bratio:7},
+        {a:"dogs",b:"cats",aratio:6,bratio:5},
+        {a:"Democrats",b:"Republicans",aratio:2,bratio:3},
+        {a:"fiction books",b:"nonfiction books",aratio:3,bratio:5}
+      ];
+      const ctx=pick(items);
+      const mult=rnd(2,8);
+      const knowA=ctx.aratio*mult;
+      const ansB=ctx.bratio*mult;
+      return{
+        teach:`If ${ctx.a}:${ctx.b} = ${ctx.aratio}:${ctx.bratio} and you know the count of ${ctx.a}, find the scale factor, then multiply by the other ratio number.`,
+        question:`The ratio of ${ctx.a} to ${ctx.b} is ${ctx.aratio}:${ctx.bratio}. There are ${knowA} ${ctx.a}. How many ${ctx.b} are there?`,
+        answer:ansB,type:"number",level:"Challenge",
+        explanation:`Scale factor = ${knowA}÷${ctx.aratio}=${mult}. ${ctx.b}: ${ctx.bratio}×${mult}=${ansB} ✅`
+      };
+    },
+    // ─── 16. Multi-step conversion (chain of unit fractions) ───
+    function(){
+      const problems=[
+        {q:`How many inches are in 2.5 yards? (1 yard = 3 feet, 1 foot = 12 inches)`,
+         ans:90,exp:`2.5 yd × 3 ft/yd × 12 in/ft = 2.5 × 36 = 90 inches ✅`},
+        {q:`How many inches are in 4 yards? (1 yard = 3 feet, 1 foot = 12 inches)`,
+         ans:144,exp:`4 × 3 × 12 = 144 inches ✅`},
+        {q:`How many feet are in 2 miles? (1 mile = 5,280 feet)`,
+         ans:10560,exp:`2 × 5280 = 10,560 feet ✅`},
+        {q:`How many centimeters are in 3.5 meters? (1 m = 100 cm)`,
+         ans:350,exp:`3.5 × 100 = 350 cm ✅`},
+        {q:`How many milliliters are in 2.5 liters? (1 L = 1000 mL)`,
+         ans:2500,exp:`2.5 × 1000 = 2500 mL ✅`}
+      ];
+      const p=pick(problems);
+      return{teach:`Chain conversions: multiply by each conversion fraction in sequence. Units cancel across the multiplication.`,
+        question:p.q,answer:p.ans,type:"number",level:"Challenge",explanation:p.exp};
+    },
+    // ─── 17. Proportional or not? (yes/no) ───
+    function(){
+      const tables=[
+        {data:[[1,4],[2,8],[3,12]],prop:true,exp:`Each y÷x = 4 (constant). Proportional! ✅`},
+        {data:[[2,6],[4,10],[6,15]],prop:false,exp:`6÷2=3, 10÷4=2.5 — not constant. NOT proportional! ✅`},
+        {data:[[3,9],[6,18],[9,27]],prop:true,exp:`Each y÷x = 3 (constant). Proportional! ✅`},
+        {data:[[1,5],[2,9],[3,14]],prop:false,exp:`5÷1=5, 9÷2=4.5 — not constant. NOT proportional! ✅`},
+        {data:[[4,12],[8,24],[12,36]],prop:true,exp:`Each y÷x = 3 (constant). Proportional! ✅`}
+      ];
+      const t=pick(tables);
+      const tHTML=`<table style='border-collapse:collapse;margin:10px auto;font-size:16px'>`+
+        `<tr><th style='border:2px solid #0076B6;padding:6px 14px;background:#e0f0ff'>x</th>`+
+        `<th style='border:2px solid #0076B6;padding:6px 14px;background:#e0f0ff'>y</th></tr>`+
+        t.data.map(p=>`<tr><td style='border:2px solid #cbd5e1;padding:6px 14px;text-align:center'>${p[0]}</td>`+
+          `<td style='border:2px solid #cbd5e1;padding:6px 14px;text-align:center'>${p[1]}</td></tr>`).join("")+
+        `</table>`;
+      return{teach:`A table is proportional if y÷x gives the SAME value (k) for every row. If it changes, it's NOT proportional.`,
+        question:`Is this table proportional? Check if y÷x is constant for every row.${tHTML}`,
+        answer:t.prop?"yes":"no",type:"yesno",level:"Core Skill",explanation:t.exp};
+    },
+    // ─── 18. Unit rate from a word problem, then scale ───
+    function(){
+      const scenarios=[
+        {ctx:`A recipe uses`,ingA:"cups of flour",ingB:"cups of sugar",ka:rnd(2,4),kb:rnd(1,2)},
+        {ctx:`A store charges`,ingA:"apples",ingB:"dollars",ka:rnd(4,8),kb:rnd(3,6)},
+        {ctx:`A car travels`,ingA:"hours",ingB:"miles",ka:1,kb:rnd(40,65)}
+      ];
+      const s=pick(scenarios);
+      const k=s.kb/s.ka;
+      const xNew=rnd(2,6)*s.ka;
+      const ans=+(k*xNew).toFixed(2);
+      return{
+        teach:`Find the unit rate first (divide both parts of ratio by the first number). Then multiply to scale.`,
+        question:`${s.ctx} ${s.ka} ${s.ingA} for every ${s.kb} ${s.ingB}. How many ${s.ingB} for ${xNew} ${s.ingA}?`,
+        answer:ans,type:"number",level:"Challenge",
+        explanation:`Unit rate: ${s.kb}÷${s.ka}=${k.toFixed(2)} ${s.ingB} per ${s.ingA}. Answer: ${k.toFixed(2)}×${xNew}=${ans} ✅`
+      };
+    },
+    // ─── 19. Part-to-whole given total and ratio ───
+    function(){
+      const ratios=[{a:3,b:4},{a:5,b:7},{a:2,b:9},{a:4,b:6},{a:3,b:8}];
+      const r=pick(ratios);
+      const mult=rnd(2,6);
+      const total=(r.a+r.b)*mult;
+      const ansA=r.a*mult;
+      const contexts=[
+        {groupA:"cats",groupB:"dogs"},
+        {groupA:"boys",groupB:"girls"},
+        {groupA:"red cards",groupB:"blue cards"},
+        {groupA:"fiction",groupB:"nonfiction"}
+      ];
+      const ctx=pick(contexts);
+      return{
+        teach:`Part-to-whole ratios: find total parts (${r.a}+${r.b}=${r.a+r.b}), find scale factor (total÷total parts), multiply for each group.`,
+        question:`The ratio of ${ctx.groupA} to ${ctx.groupB} is ${r.a}:${r.b}. There are ${total} total. How many ${ctx.groupA}?`,
+        answer:ansA,type:"number",level:"Challenge",
+        explanation:`Total parts=${r.a+r.b}. Scale factor=${total}÷${r.a+r.b}=${mult}. ${ctx.groupA}=${r.a}×${mult}=${ansA} ✅`
+      };
+    },
+    // ─── 20. Comparison: which has a greater ratio (unit rate) ───
+    function(){
+      const contexts=[
+        {label:"words per minute"},
+        {label:"miles per gallon"},
+        {label:"points per game"},
+        {label:"items packed per hour"}
+      ];
+      const ctx=pick(contexts);
+      const a1=rnd(3,12),b1=rnd(2,6);
+      const a2=rnd(3,12),b2=rnd(2,6);
+      const r1=a1/b1,r2=a2/b2;
+      const better=r1>r2?"Option A":"Option B";
+      return{
+        teach:`To compare ratios, compute the unit rate for each. Divide the first number by the second. The bigger unit rate wins!`,
+        question:`Option A: ${a1} ${ctx.label.split(" ").slice(-2).join(" ")} in ${b1} ${ctx.label.split(" ")[ctx.label.split(" ").length-1]==="minute"?"minutes":"units"}. Option B: ${a2} in ${b2}. Which has the greater rate?`,
+        answer:better,type:"choice",level:"Challenge",choices:["Option A","Option B"],
+        explanation:`A: ${a1}÷${b1}=${r1.toFixed(2)}. B: ${a2}÷${b2}=${r2.toFixed(2)}. ${better} is greater ✅`
+      };
+    }
+  ];
+  return pick(G)();
+}
+
 const TOPICS=[
   {id:"retake",name:"Quiz 5 Retake Prep",icon:"🚨",desc:"Ratios — study guide review",gen:genRetakeRatios,retake:true,
    takeaway:"Remember: Ratios compare two quantities. Part-to-part = group vs group. Part-to-whole = group vs total. Equivalent ratios use the SAME scale factor. Unit rates help you compare!"},
@@ -1634,7 +2022,9 @@ const TOPICS=[
   {id:"stats",name:"Mean, Median & Range",icon:"📊",desc:"Averages, middle & spread",gen:genStats,
    takeaway:"Mean = sum ÷ count. Median = middle value (order first!). Mode = most frequent. Range = max − min."},
   {id:"proportional",name:"Ratios & Proportional Relationships",icon:"📈",desc:"Tables, unit rates & y = kx",gen:genProportional,
-   takeaway:"In y = kx, k is the constant of proportionality (unit rate). To find k: divide y ÷ x. To complete a table: multiply or divide using k. For proportions: cross-multiply to solve!"}
+   takeaway:"In y = kx, k is the constant of proportionality (unit rate). To find k: divide y ÷ x. To complete a table: multiply or divide using k. For proportions: cross-multiply to solve!"},
+  {id:"unit5",name:"Unit 5 Study Guide",icon:"📋",desc:"Ratios, rates, conversions & better buys",gen:genUnit5Ratios,
+   takeaway:"Part-to-part compares groups. Part-to-whole includes the total. Unit rate = total ÷ quantity. For conversions: multiply when going smaller, divide when going larger. Better buy = lower unit price!"}
 ];
 
 // ============ MAVERICK'S THEME DATA ============
